@@ -42,7 +42,7 @@ func (od *OneDrive) CacheDrivePath(path string) (*DriveCache, error) {
 	reqURL := od.DrivePathToURL(path)
 
 	for _, driveCache := range od.DriveCache {
-		if driveCache.Path == reqURL {
+		if driveCache.Path == reqURL && time.Now().Sub(driveCache.UpdateAt) < time.Second * 1800 {
 			log.Println("Read drive cache timestamp: ", driveCache.UpdateAt)
 			return &driveCache, nil
 		}
@@ -111,7 +111,7 @@ func (od *OneDrive) CacheDrivePathContentURL(path string) (*url.URL, error) {
 	reqURL := od.DrivePathContentToURL(path)
 
 	for _, driveCacheContentURL := range od.DriveCacheContentURL {
-		if driveCacheContentURL.Path == reqURL {
+		if driveCacheContentURL.Path == reqURL && time.Now().Sub(driveCacheContentURL.UpdateAt) < time.Second * 1800 {
 			log.Println("Read content cache timestamp: ", driveCacheContentURL.UpdateAt)
 			return &driveCacheContentURL.URL, nil
 		}
@@ -150,7 +150,7 @@ func (od *OneDrive) AutoCacheDrivePathContentURL(driveCache DriveCache) error {
 
 			func() {
 				for _, driveCacheContentURL := range od.DriveCacheContentURL {
-					if driveCacheContentURL.Path == reqURL {
+					if driveCacheContentURL.Path == reqURL && time.Now().Sub(driveCacheContentURL.UpdateAt) < time.Second * 1800 {
 						log.Println("Read content cache timestamp: ", driveCacheContentURL.UpdateAt)
 						return
 					}

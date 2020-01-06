@@ -96,11 +96,11 @@ func (od *OneDrive) CacheDrivePath(path string) (*DriveCache, error) {
 		UpdateAt:             time.Now(),
 	}
 
-	// od.DriveCache = append(od.DriveCache, driveCache)
+	od.DriveCache = append(od.DriveCache, driveCache)
 
-	// if err := od.SaveDriveCacheFile(); err != nil {
-	// 	return nil, err
-	// }
+	if err := od.SaveDriveCacheFile(); err != nil {
+		return nil, err
+	}
 
 	go od.AutoCacheDrivePathContentURL(driveCache)
 
@@ -174,8 +174,6 @@ func (od *OneDrive) AutoCacheDrivePathContentURL(driveCache DriveCache) error {
 			od.DriveCacheContentURL = append(od.DriveCacheContentURL, driveCacheContentURL)
 		}
 	}
-
-	od.DriveCache = append(od.DriveCache, driveCache)
 
 	if err := od.SaveDriveCacheFile(); err != nil {
 		return err

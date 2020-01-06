@@ -19,6 +19,7 @@ type OneDrive struct {
 	DriveDescriptionConfig DriveDescriptionConfig  `json:"driveDescriptionConfig"`
 	MicrosoftGraphAPIToken *MicrosoftGraphAPIToken `json:"microsoftGraphApiToken"`
 	DriveCache             *[]DriveCache           `json:"driveCache"`
+	DriveCacheContentURL   []DriveCacheContentURL  `json:"driveCacheContentUrl"`
 }
 
 // AppRegistrationConfig configures the app in Azure Active Directory admin center.
@@ -90,6 +91,12 @@ type DriveCacheItem struct {
 	LastModifiedDateTime string `json:"lastModifiedDateTime"`
 }
 
+type DriveCacheContentURL struct {
+	Path     string    `json:"path"`
+	URL      url.URL   `json:"url"`
+	UpdateAt time.Time `json:"updateAt"`
+}
+
 // Drive structure
 
 type DriveFolder struct {
@@ -149,6 +156,9 @@ func (od *OneDrive) Run() error {
 		return err
 	}
 	if err := od.SaveConfigFile(); err != nil {
+		return err
+	}
+	if err := od.LoadDriveCacheFile(); err != nil {
 		return err
 	}
 	if err := od.Cron(); err != nil {
@@ -332,17 +342,16 @@ func (od *OneDrive) GetDrivePath(path string) (*DriveCache, error) {
 	return od.CacheDrivePath(path)
 }
 
-func (od *OneDrive) DrivePathContentToURL(path string) string {
-	reqURL := od.DriveDescriptionConfig.EndPointURI
-	reqURL += RegularRootPath(od.DriveDescriptionConfig.RootPath)
-	reqURL += RegularPath(path)
-	reqURL += ":/content"
-	log.Println(reqURL)
-	return reqURL
-}
-
-func (od *OneDrive) GetDrivePathContentURL(path string) (*url.URL, error) {
+func (od *OneDrive) CacheDrivePathContentURL(path string) (*url.URL, error) {
 	reqURL := od.DrivePathContentToURL(path)
+
+	for _, driveCacheContentURL := range od.DriveCacheContentURL {
+		if driveCacheContentURL.Path == reqURL {
+			log.Println("Read cache: ", reqURL)
+			return &driveCacheContentURL.URL, nil
+		}
+	}
+
 	req, err := http.NewRequest("GET", reqURL, nil)
 	if err != nil {
 		return nil, err
@@ -353,7 +362,30 @@ func (od *OneDrive) GetDrivePathContentURL(path string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
+	driveCacheContentURL := DriveCacheContentURL{
+		Path:     reqURL,
+		URL:      *resp.Request.URL,
+		UpdateAt: time.Now(),
+	}
+	od.DriveCacheContentURL = append(od.DriveCacheContentURL, driveCacheContentURL)
 
-	log.Println(resp.Request.URL)
-	return resp.Request.URL, nil
+	if err := od.SaveDriveCacheFile(); err != nil {
+		return nil, err
+	}
+
+	log.Println(driveCacheContentURL.URL)
+	return &driveCacheContentURL.URL, nil
+}
+
+func (od *OneDrive) DrivePathContentToURL(path string) string {
+	reqURL := od.DriveDescriptionConfig.EndPointURI
+	reqURL += RegularRootPath(od.DriveDescriptionConfig.RootPath)
+	reqURL += RegularPath(path)
+	reqURL += ":/content"
+	log.Println(reqURL)
+	return reqURL
+}
+
+func (od *OneDrive) GetDrivePathContentURL(path string) (*url.URL, error) {
+	return od.CacheDrivePathContentURL(path)
 }

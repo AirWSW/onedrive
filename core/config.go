@@ -48,7 +48,7 @@ func (od *OneDrive) HotReloadConfigFile() error {
 	argNum := len(os.Args)
 	configFile := "config.json"
 	if argNum > 1 {
-		if os.Args[argNum-2] == "-c" {
+		if os.Args[argNum-2] == "--config" {
 			configFile = os.Args[argNum-1]
 		}
 	}
@@ -64,6 +64,35 @@ func (od *OneDrive) HotReloadConfigFile() error {
 	od.AppRegistrationConfig = newOD.AppRegistrationConfig
 	od.DriveDescriptionConfig = newOD.DriveDescriptionConfig
 	log.Println("OneDrive config file hot reloaded")
+	return nil
+}
+
+func (od *OneDrive) SaveDriveCacheFile() error {
+	cacheFile := "cache.json"
+	file, _ := os.OpenFile(cacheFile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	defer file.Close()
+	encoder := json.NewEncoder(file)
+	err := encoder.Encode(&od.DriveCacheContentURL)
+	if err != nil {
+		return err
+	}
+	log.Println("OneDrive cache file saved to " + cacheFile)
+	return nil
+}
+
+func (od *OneDrive) LoadDriveCacheFile() error {
+	cacheFile := "cache.json"
+	file, _ := os.Open(cacheFile)
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+
+	driveCacheContentURL := []DriveCacheContentURL{}
+	err := decoder.Decode(&driveCacheContentURL)
+	if err != nil {
+		return err
+	}
+	od.DriveCacheContentURL = driveCacheContentURL
+	log.Println("OneDrive cache file hot reloaded")
 	return nil
 }
 

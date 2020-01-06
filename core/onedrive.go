@@ -231,11 +231,11 @@ func RegularPath(path string) (str string) {
 		if path == "/" {
 			str = "/"
 		} else if path[0] == '/' && path[length-1] == '/' {
-			str = path[0:(length - 2)]
+			str = path[0:(length - 1)]
 		} else if path[0] == '/' && path[length-1] != '/' {
 			str = path
 		} else if path[0] != '/' && path[length-1] == '/' {
-			str = "/" + path[0:(length-2)]
+			str = "/" + path[0:(length-1)]
 		} else if path[0] != '/' && path[length-1] != '/' {
 			str = "/" + path
 		}
@@ -308,6 +308,7 @@ func (od *OneDrive) CacheDrivePath(path string) (*DriveCache, error) {
 			DownloadURL:          downloadURL,
 			MimeType:             item.File.MimeType,
 			QuickXorHash:         item.File.Hashes.QuickXorHash,
+			CreatedDateTime:      item.CreatedDateTime,
 			LastModifiedDateTime: item.LastModifiedDateTime,
 		})
 	}

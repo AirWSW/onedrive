@@ -15,5 +15,5 @@
 # vendor/
 
 *bin
-*.config.json
+*config.json
 info.md

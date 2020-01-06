@@ -8,7 +8,7 @@ import (
 
 func CreateOneDriveFromConfigFile() (od OneDrive, err error) {
 	argNum := len(os.Args)
-	configFile := "airw.cf.config.json"
+	configFile := "config.json"
 	if argNum > 1 {
 		if os.Args[argNum-2] == "-c" {
 			configFile = os.Args[argNum-1]
@@ -25,7 +25,7 @@ func CreateOneDriveFromConfigFile() (od OneDrive, err error) {
 }
 
 func (od *OneDrive) SaveConfigFile() error {
-	configFile := "airw.cf.config.json"
+	configFile := "config.json"
 	file, _ := os.OpenFile(configFile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	defer file.Close()
 	encoder := json.NewEncoder(file)
@@ -46,7 +46,7 @@ func (od *OneDrive) SaveConfigFile() error {
 
 func (od *OneDrive) HotReloadConfigFile() error {
 	argNum := len(os.Args)
-	configFile := "airw.cf.config.json"
+	configFile := "config.json"
 	if argNum > 1 {
 		if os.Args[argNum-2] == "-c" {
 			configFile = os.Args[argNum-1]

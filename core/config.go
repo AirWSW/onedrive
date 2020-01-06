@@ -72,7 +72,14 @@ func (od *OneDrive) SaveDriveCacheFile() error {
 	file, _ := os.OpenFile(cacheFile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	defer file.Close()
 	encoder := json.NewEncoder(file)
-	err := encoder.Encode(&od.DriveCacheContentURL)
+	newOD := struct {
+		DriveCache           []DriveCache           `json:"driveCache"`
+		DriveCacheContentURL []DriveCacheContentURL `json:"driveCacheContentUrl"`
+	}{
+		od.DriveCache,
+		od.DriveCacheContentURL,
+	}
+	err := encoder.Encode(&newOD)
 	if err != nil {
 		return err
 	}
@@ -86,13 +93,15 @@ func (od *OneDrive) LoadDriveCacheFile() error {
 	defer file.Close()
 	decoder := json.NewDecoder(file)
 
-	driveCacheContentURL := []DriveCacheContentURL{}
-	err := decoder.Decode(&driveCacheContentURL)
+	newOD := OneDrive{}
+	err := decoder.Decode(&newOD)
 	if err != nil {
 		return err
 	}
-	od.DriveCacheContentURL = driveCacheContentURL
-	log.Println("OneDrive cache file hot reloaded")
+	od.DriveCache = newOD.DriveCache
+	od.DriveCacheContentURL = newOD.DriveCacheContentURL
+
+	log.Println("OneDrive cache file loaded")
 	return nil
 }
 

@@ -8,9 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
-
-	"github.com/robfig/cron/v3"
 )
 
 // OneDrive presends a single OneDrive client end-point.
@@ -18,7 +15,7 @@ type OneDrive struct {
 	AppRegistrationConfig  AppRegistrationConfig   `json:"appRegistrationConfig"`
 	DriveDescriptionConfig DriveDescriptionConfig  `json:"driveDescriptionConfig"`
 	MicrosoftGraphAPIToken *MicrosoftGraphAPIToken `json:"microsoftGraphApiToken"`
-	DriveCache             *[]DriveCache           `json:"driveCache"`
+	DriveCache             []DriveCache           `json:"driveCache"`
 	DriveCacheContentURL   []DriveCacheContentURL  `json:"driveCacheContentUrl"`
 }
 
@@ -66,35 +63,6 @@ type MicrosoftGraphAPIToken struct {
 	Scope        string `json:"scope"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
-}
-
-// Drive cache structure
-
-type DriveCache struct {
-	Path                 string           `json:"path"`
-	Name                 string           `json:"name"`
-	Size                 int              `json:"size"`
-	Items                []DriveCacheItem `json:"items"`
-	CreatedDateTime      string           `json:"createdDateTime"`
-	LastModifiedDateTime string           `json:"lastModifiedDateTime"`
-	CacheLastUpdateAt    string           `json:"lastUpdateAt"`
-}
-
-type DriveCacheItem struct {
-	Name                 string `json:"name"`
-	Size                 int    `json:"size"`
-	ChildCount           int    `json:"childCount"`
-	DownloadURL          string `json:"downloadUrl"`
-	MimeType             string `json:"mimeType"`
-	QuickXorHash         string `json:"quickXorHash"`
-	CreatedDateTime      string `json:"createdDateTime"`
-	LastModifiedDateTime string `json:"lastModifiedDateTime"`
-}
-
-type DriveCacheContentURL struct {
-	Path     string    `json:"path"`
-	URL      url.URL   `json:"url"`
-	UpdateAt time.Time `json:"updateAt"`
 }
 
 // Drive structure
@@ -167,17 +135,6 @@ func (od *OneDrive) Run() error {
 	return nil
 }
 
-func (od *OneDrive) Cron() error {
-	c := cron.New(cron.WithSeconds())
-	// Every half hour, starting a half hour from now
-	c.AddFunc("@every 30m", func() {
-		od.GetMicrosoftGraphAPIToken()
-		od.SaveConfigFile()
-	})
-	c.Start()
-	return nil
-}
-
 func (od *OneDrive) getMicrosoftGraphAPITokenPostForm() (io.Reader, error) {
 	data := url.Values{}
 	if od.DriveDescriptionConfig.RefreshToken != "" {
@@ -229,7 +186,6 @@ func (od *OneDrive) GetMicrosoftGraphAPIToken() error {
 	}
 	od.DriveDescriptionConfig.RefreshToken = od.MicrosoftGraphAPIToken.RefreshToken
 
-	log.Println(string(body))
 	return nil
 }
 
@@ -279,102 +235,12 @@ func (od *OneDrive) DrivePathToURL(path string) string {
 	return reqURL
 }
 
-func (od *OneDrive) CacheDrivePath(path string) (*DriveCache, error) {
-	path = RegularPath(path)
-
-	reqURL := od.DrivePathToURL(path)
-	req, err := http.NewRequest("GET", reqURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", "Bearer "+od.MicrosoftGraphAPIToken.AccessToken)
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	driveFolder := DriveFolder{}
-	if err = json.Unmarshal([]byte(body), &driveFolder); err != nil {
-		return nil, err
-	}
-
-	log.Println(string(body))
-	driveCacheItem := []DriveCacheItem{}
-	for _, item := range driveFolder.Children {
-		downloadURL := ""
-		if item.File.MimeType != "" {
-			name, _ := url.QueryUnescape(item.Name)
-			downloadURL += path + "/" + name
-		}
-		driveCacheItem = append(driveCacheItem, DriveCacheItem{
-			Name:                 item.Name,
-			Size:                 item.Size,
-			ChildCount:           item.Folder.ChildCount,
-			DownloadURL:          downloadURL,
-			MimeType:             item.File.MimeType,
-			QuickXorHash:         item.File.Hashes.QuickXorHash,
-			CreatedDateTime:      item.CreatedDateTime,
-			LastModifiedDateTime: item.LastModifiedDateTime,
-		})
-	}
-	driveCache := &DriveCache{
-		Path:                 path,
-		Name:                 driveFolder.Name,
-		Size:                 driveFolder.Size,
-		CreatedDateTime:      driveFolder.CreatedDateTime,
-		LastModifiedDateTime: driveFolder.LastModifiedDateTime,
-		Items:                driveCacheItem,
-		CacheLastUpdateAt:    time.Now().String(),
-	}
-	return driveCache, nil
-}
-
 func (od *OneDrive) GetDriveRootPath() (*DriveCache, error) {
 	return od.GetDrivePath("")
 }
 
 func (od *OneDrive) GetDrivePath(path string) (*DriveCache, error) {
 	return od.CacheDrivePath(path)
-}
-
-func (od *OneDrive) CacheDrivePathContentURL(path string) (*url.URL, error) {
-	reqURL := od.DrivePathContentToURL(path)
-
-	for _, driveCacheContentURL := range od.DriveCacheContentURL {
-		if driveCacheContentURL.Path == reqURL {
-			log.Println("Read cache: ", reqURL)
-			return &driveCacheContentURL.URL, nil
-		}
-	}
-
-	req, err := http.NewRequest("GET", reqURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", "Bearer "+od.MicrosoftGraphAPIToken.AccessToken)
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	driveCacheContentURL := DriveCacheContentURL{
-		Path:     reqURL,
-		URL:      *resp.Request.URL,
-		UpdateAt: time.Now(),
-	}
-	od.DriveCacheContentURL = append(od.DriveCacheContentURL, driveCacheContentURL)
-
-	if err := od.SaveDriveCacheFile(); err != nil {
-		return nil, err
-	}
-
-	log.Println(driveCacheContentURL.URL)
-	return &driveCacheContentURL.URL, nil
 }
 
 func (od *OneDrive) DrivePathContentToURL(path string) string {

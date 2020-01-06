@@ -50,6 +50,19 @@ func handleGetFile(c *gin.Context) {
 	c.Redirect(http.StatusFound, url.String())
 }
 
+func handleGetStream(c *gin.Context) {
+	path := c.Param("path")
+	url, err := OD.GetDrivePathContentURL(path)
+	if err != nil {
+		log.Println(err)
+	}
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
+	c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
+	c.Redirect(http.StatusFound, url.String())
+}
+
 func main() {
 	OD, _ = core.CreateOneDriveFromConfigFile()
 	if err := OD.Run(); err != nil {
@@ -60,9 +73,11 @@ func main() {
 	router.GET("/auth", handleGetAuth)
 	router.GET("/drive", handleGetDrive)
 	router.GET("/file", handleGetFile)
+	router.GET("/stream/*path", handleGetStream)
 	router.GET("/onedrive/auth", handleGetAuth)
 	router.GET("/onedrive/drive", handleGetDrive)
 	router.GET("/onedrive/file", handleGetFile)
+	router.GET("/onedrive/stream/*path", handleGetStream)
 	if err := router.Run("localhost:8081"); err != nil {
 		log.Panicln(err)
 	}

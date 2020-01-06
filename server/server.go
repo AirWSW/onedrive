@@ -5,19 +5,29 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/AirWSW/onedrive"
-
 	"github.com/gin-gonic/gin"
+
+	"github.com/AirWSW/onedrive/core"
 )
 
-var OD onedrive.OneDrive
+var OD core.OneDrive
 
-func handleGetAuthRedirect(c *gin.Context) {
+func handleGetAuth(c *gin.Context) {
 	code := c.Query("code")
+	if len(code) > 0 {
+		OD.DriveDescriptionConfig.Code = code
+		if err := OD.GetMicrosoftGraphAPIToken(); err != nil {
+			log.Println(err)
+		}
+		OD.DriveDescriptionConfig.Code = ""
+		if err := OD.SaveConfigFile(); err != nil {
+			log.Println(err)
+		}
+	}
 	c.String(http.StatusOK, "code %s", code)
 }
 
-func handleGetAPIOneDrive(c *gin.Context) {
+func handleGetDrive(c *gin.Context) {
 	path := c.Query("path")
 	driveCache, err := OD.GetDrivePath(path)
 	log.Println(err)
@@ -25,24 +35,28 @@ func handleGetAPIOneDrive(c *gin.Context) {
 	c.String(http.StatusOK, "%s", bytes)
 }
 
-func handleGetAPIDownload(c *gin.Context) {
+func handleGetFile(c *gin.Context) {
 	path := c.Query("path")
 	url, err := OD.GetDrivePathContentURL(path)
 	log.Println(err)
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
+	c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
 	c.Redirect(http.StatusFound, url.String())
 }
 
 func main() {
-	OD, _ = onedrive.CreateDefaultOneDrive()
-	if err := OD.GetMSGraphAPIToken(); err != nil {
+	OD, _ = core.CreateOneDriveFromConfigFile()
+	if err := OD.Run(); err != nil {
 		log.Panicln(err)
 	}
 	gin.SetMode(gin.DebugMode)
 	router := gin.Default()
-	router.GET("/auth-redirect", handleGetAuthRedirect)
-	router.GET("/api/onedrive", handleGetAPIOneDrive)
-	router.GET("/api/download", handleGetAPIDownload)
-	if err := router.Run(":8081"); err != nil {
+	router.GET("/onedrive/auth", handleGetAuth)
+	router.GET("/onedrive/drive", handleGetDrive)
+	router.GET("/onedrive/file", handleGetFile)
+	if err := router.Run("localhost:8081"); err != nil {
 		log.Panicln(err)
 	}
 }

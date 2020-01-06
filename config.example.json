@@ -1,0 +1,17 @@
+{
+    "registerConfig": {
+        "endPointURI": "https://login.chinacloudapi.cn/common/oauth2/v2.0/token",
+        "scope": "user.read files.readwrite.all offline_access",
+        "clientID": "",
+        "clientSecret": "",
+        "redirectURI": ""
+    },
+    "driveConfig": {
+        "endPointURI": "https://microsoftgraph.chinacloudapi.cn/v1.0/me/drive",
+        "rootPath": "root",
+        "fileRefreshInterval": 1200,
+        "folderRefreshInterval": 600,
+        "code": "",
+        "refreshToken": ""
+    }
+}

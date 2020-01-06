@@ -30,7 +30,9 @@ func handleGetAuth(c *gin.Context) {
 func handleGetDrive(c *gin.Context) {
 	path := c.Query("path")
 	driveCache, err := OD.GetDrivePath(path)
-	log.Println(err)
+	if err != nil {
+		log.Println(err)
+	}
 	bytes, _ := json.Marshal(driveCache)
 	c.String(http.StatusOK, "%s", bytes)
 }
@@ -38,7 +40,9 @@ func handleGetDrive(c *gin.Context) {
 func handleGetFile(c *gin.Context) {
 	path := c.Query("path")
 	url, err := OD.GetDrivePathContentURL(path)
-	log.Println(err)
+	if err != nil {
+		log.Println(err)
+	}
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
 	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")

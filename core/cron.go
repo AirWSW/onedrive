@@ -32,7 +32,7 @@ func (od *OneDrive) Cron() error {
 
 func (od *OneDrive) CronCacheDrive() error {
 	for i, item := range od.DriveCacheContentURL {
-		if item.UpdateAt-time.Now().Unix() > 1200 {
+		if time.Now().Unix() - item.UpdateAt  > 1200 {
 			log.Println("Updating: " + item.RequestURL)
 			driveCacheContentURL, err := od.getDriveCacheContentURL(item.RequestURL)
 			if err != nil {
@@ -46,7 +46,7 @@ func (od *OneDrive) CronCacheDrive() error {
 
 func (od *OneDrive) CronCacheDrivePathContentURL() error {
 	for i, item := range od.DriveCache {
-		if item.UpdateAt-time.Now().Unix() > 600 {
+		if time.Now().Unix() - item.UpdateAt > 600 {
 			log.Println("Updating: " + item.RequestURL)
 			driveCache, err := od.getDriveCache(item.Path, item.RequestURL)
 			if err != nil {

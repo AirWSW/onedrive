@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,6 +16,7 @@ type OneDrive struct {
 	AppRegistrationConfig  AppRegistrationConfig   `json:"appRegistrationConfig"`
 	DriveDescriptionConfig DriveDescriptionConfig  `json:"driveDescriptionConfig"`
 	MicrosoftGraphAPIToken *MicrosoftGraphAPIToken `json:"microsoftGraphApiToken"`
+	DriveItemsCaches       []DriveItemsCache       `json:"driveItemsCaches"`
 	DriveCache             []DriveCache            `json:"driveCache"`
 	DriveCacheContentURL   []DriveCacheContentURL  `json:"driveCacheContentUrl"`
 }
@@ -148,19 +150,20 @@ func (od *OneDrive) getMicrosoftGraphAPITokenPostForm() (io.Reader, error) {
 		clientID := od.AppRegistrationConfig.ClientID
 		grantScope := url.QueryEscape(od.DriveDescriptionConfig.GrantScope)
 		for _, redirectURI := range od.AppRegistrationConfig.RedirectURIs {
-			log.Println("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=" + clientID + "&scope=" + grantScope + "&response_type=code&redirect_uri=" + redirectURI)
+			log.Println(od.AppRegistrationConfig.EndPointURI + "/authorize?client_id=" + clientID + "&scope=" + grantScope + "&response_type=code&redirect_uri=" + redirectURI)
 		}
 		// return nil, errors.New("Invalid Microsoft Graph API Token Grant Type")
 		return nil, nil
 	}
 	data.Set("client_id", od.AppRegistrationConfig.ClientID)
 	data.Set("client_secret", od.AppRegistrationConfig.ClientSecret)
-	data.Set("redirect_uri", od.AppRegistrationConfig.RedirectURIs[3])
+	data.Set("redirect_uri", od.AppRegistrationConfig.RedirectURIs[0])
 	return strings.NewReader(data.Encode()), nil
 }
 
 func (od *OneDrive) GetMicrosoftGraphAPIToken() error {
 	endPointURI := od.AppRegistrationConfig.EndPointURI
+	endPointURI += "/token"
 	postForm, err := od.getMicrosoftGraphAPITokenPostForm()
 	if err != nil {
 		return err
@@ -181,12 +184,42 @@ func (od *OneDrive) GetMicrosoftGraphAPIToken() error {
 	if err != nil {
 		return err
 	}
-	if err = json.Unmarshal([]byte(body), &od.MicrosoftGraphAPIToken); err != nil {
+
+	if err = json.Unmarshal(body, &od.MicrosoftGraphAPIToken); err != nil {
 		return err
 	}
+	if od.MicrosoftGraphAPIToken == nil {
+		log.Println(string(body))
+		return errors.New("GetMicrosoftGraphAPITokenRequestError")
+	}
+
 	od.DriveDescriptionConfig.RefreshToken = od.MicrosoftGraphAPIToken.RefreshToken
 
 	return nil
+}
+
+func RegularPathToPathFilename(rPath string) (path, filename string) {
+	strS := strings.Split(rPath, "/")
+	strR := ""
+	for _, str := range strS {
+		if str != "" {
+			strR += "/" + str
+		}
+	}
+	if strR == "" {
+		strR += "/"
+	}
+	strRR := strings.Split(strR, "/")
+	n := len(strRR)
+	if n > 1 {
+		for _, str := range strRR[0 : n-1] {
+			if str != "" {
+				path += "/" + str
+			}
+		}
+		filename = strRR[n-1]
+	}
+	return path, filename
 }
 
 func RegularPath(path string) (rPath string) {
@@ -221,40 +254,110 @@ func RegularRootPath(path string) (str string) {
 	if length > 0 {
 		path = RegularPath(path)
 		if path == "/" || path == "/root" || path == "/root:" {
-			str = "/root:"
+			str = "/drive/root:"
 		} else {
-			str = "/root:" + path
+			str = "/drive/root:" + path
 		}
 	} else {
-		str = "/root:"
+		str = "/drive/root:"
 	}
 	return str
 }
 
 func (od *OneDrive) DrivePathToURL(path string) string {
 	reqURL := od.DriveDescriptionConfig.EndPointURI
+	reqURL += "/me"
 	reqURL += RegularRootPath(od.DriveDescriptionConfig.RootPath)
 	reqURL += path
 	reqURL += "?expand=children($select=name,size,file,folder,parentReference,createdDateTime,lastModifiedDateTime)"
 	return reqURL
 }
 
-func (od *OneDrive) GetDriveRootPath() (*DriveCache, error) {
-	return od.GetDrivePath("")
-}
-
-func (od *OneDrive) GetDrivePath(path string) (*DriveCache, error) {
-	return od.CacheDrivePath(path)
-}
-
 func (od *OneDrive) DrivePathContentToURL(path string) string {
 	reqURL := od.DriveDescriptionConfig.EndPointURI
+	reqURL += "/me"
 	reqURL += RegularRootPath(od.DriveDescriptionConfig.RootPath)
 	reqURL += RegularPath(path)
 	reqURL += ":/content"
 	return reqURL
 }
 
-func (od *OneDrive) GetDrivePathContentURL(path string) (*url.URL, error) {
-	return od.CacheDrivePathContentURL(path)
+// DriveItemsPayload presents drive items cache structure
+type DriveItemsPayload struct {
+	DriveItems          []DriveItemPayload         `json:"driveItem"`
+	DriveItemsReference DriveItemsReferencePayload `json:"driveItemReference"`
+}
+
+type DriveItemPayload struct {
+	Path           string  `json:"path"`
+	Name           string  `json:"name"`
+	Size           int     `json:"size"`
+	ChildCount     *int    `json:"childCount"`
+	MimeType       *string `json:"mimeType"`
+	QuickXorHash   *string `json:"QuickXorHash"`
+	CreatedAt      string  `json:"createdAt"`
+	LastModifiedAt string  `json:"lastModifiedAt"`
+}
+
+type DriveItemsReferencePayload struct {
+	Path         string            `json:"path"`
+	LastUpdateAt int64             `json:"lastUpdateAt"`
+	Content      *DriveItemPayload `json:"content"`
+}
+
+func (od *OneDrive) GetDriveItemsFromRootPath() (*DriveItemsPayload, error) {
+	return od.GetDriveItemsFromPath("")
+}
+
+func (od *OneDrive) GetDriveItemsFromPath(path string) (*DriveItemsPayload, error) {
+	driveItemsCache, err := od.HitDriveItemsCaches(path)
+	if err != nil {
+		return nil, err
+	}
+
+	driveItemsReferenceCache := driveItemsCache.DriveItemsReference
+	rPath := od.GraphAPIDriveItemsPathToPath(driveItemsReferenceCache.Path)
+	driveItemsReferencePayload := DriveItemsReferencePayload{
+		Path:         rPath,
+		LastUpdateAt: driveItemsReferenceCache.LastUpdateAt,
+	}
+	var driveItemPayloads []DriveItemPayload = nil
+	if driveItemsReferenceCache.Content != nil {
+		content := driveItemsReferenceCache.Content
+		driveItemsReferencePayload.Content = &DriveItemPayload{
+			Path:           rPath + "/" + content.Name,
+			Name:           content.Name,
+			Size:           content.Size,
+			ChildCount:     content.ChildCount,
+			MimeType:       content.MimeType,
+			QuickXorHash:   content.QuickXorHash,
+			CreatedAt:      content.CreatedAt,
+			LastModifiedAt: content.LastModifiedAt,
+		}
+	} else {
+		driveItems := driveItemsCache.DriveItems
+		for _, driveItem := range driveItems {
+			newDriveItemPayload := DriveItemPayload{
+				Path:           rPath + "/" + driveItem.Name,
+				Name:           driveItem.Name,
+				Size:           driveItem.Size,
+				ChildCount:     driveItem.ChildCount,
+				MimeType:       driveItem.MimeType,
+				QuickXorHash:   driveItem.QuickXorHash,
+				CreatedAt:      driveItem.CreatedAt,
+				LastModifiedAt: driveItem.LastModifiedAt,
+			}
+			driveItemPayloads = append(driveItemPayloads, newDriveItemPayload)
+		}
+	}
+	driveItemsPayload := DriveItemsPayload{
+		DriveItems:          driveItemPayloads,
+		DriveItemsReference: driveItemsReferencePayload,
+	}
+
+	return &driveItemsPayload, nil
+}
+
+func (od *OneDrive) GetDriveItemContentURLFromPath(path string) (*url.URL, error) {
+	return od.HitDriveItemContentURLCaches(path)
 }

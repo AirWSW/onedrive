@@ -73,9 +73,11 @@ func (od *OneDrive) SaveDriveCacheFile() error {
 	defer file.Close()
 	encoder := json.NewEncoder(file)
 	newOD := struct {
+		DriveItemsCaches     []DriveItemsCache      `json:"driveItemsCaches"`
 		DriveCache           []DriveCache           `json:"driveCache"`
 		DriveCacheContentURL []DriveCacheContentURL `json:"driveCacheContentUrl"`
 	}{
+		od.DriveItemsCaches,
 		od.DriveCache,
 		od.DriveCacheContentURL,
 	}
@@ -98,6 +100,7 @@ func (od *OneDrive) LoadDriveCacheFile() error {
 	if err != nil {
 		return err
 	}
+	od.DriveItemsCaches = newOD.DriveItemsCaches
 	od.DriveCache = newOD.DriveCache
 	od.DriveCacheContentURL = newOD.DriveCacheContentURL
 

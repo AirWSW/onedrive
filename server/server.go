@@ -29,7 +29,7 @@ func handleGetAuth(c *gin.Context) {
 
 func handleGetDrive(c *gin.Context) {
 	path := c.Query("path")
-	driveCache, err := OD.GetDrivePath(path)
+	driveCache, err := OD.GetDriveItemsFromPath(path)
 	if err != nil {
 		log.Println(err)
 	}
@@ -43,7 +43,7 @@ func handleGetDrive(c *gin.Context) {
 
 func handleGetFile(c *gin.Context) {
 	path := c.Query("path")
-	url, err := OD.GetDrivePathContentURL(path)
+	url, err := OD.GetDriveItemContentURLFromPath(path)
 	if err != nil {
 		log.Println(err)
 	}
@@ -56,7 +56,7 @@ func handleGetFile(c *gin.Context) {
 
 func handleGetStream(c *gin.Context) {
 	path := c.Param("path")
-	url, err := OD.GetDrivePathContentURL(path)
+	url, err := OD.GetDriveItemContentURLFromPath(path)
 	if err != nil {
 		log.Println(err)
 	}

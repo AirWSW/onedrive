@@ -15,7 +15,7 @@ type OneDrive struct {
 	AppRegistrationConfig  AppRegistrationConfig   `json:"appRegistrationConfig"`
 	DriveDescriptionConfig DriveDescriptionConfig  `json:"driveDescriptionConfig"`
 	MicrosoftGraphAPIToken *MicrosoftGraphAPIToken `json:"microsoftGraphApiToken"`
-	DriveCache             []DriveCache           `json:"driveCache"`
+	DriveCache             []DriveCache            `json:"driveCache"`
 	DriveCacheContentURL   []DriveCacheContentURL  `json:"driveCacheContentUrl"`
 }
 
@@ -189,26 +189,31 @@ func (od *OneDrive) GetMicrosoftGraphAPIToken() error {
 	return nil
 }
 
-func RegularPath(path string) (str string) {
+func RegularPath(path string) (rPath string) {
 	// any path to "/" or "/path/to"
 	path, _ = url.QueryUnescape(path)
-	length := len(path)
-	if length > 0 {
-		if path == "/" {
-			str = "/"
-		} else if path[0] == '/' && path[length-1] == '/' {
-			str = path[0:(length - 1)]
-		} else if path[0] == '/' && path[length-1] != '/' {
-			str = path
-		} else if path[0] != '/' && path[length-1] == '/' {
-			str = "/" + path[0:(length-1)]
-		} else if path[0] != '/' && path[length-1] != '/' {
-			str = "/" + path
+	strD := strings.Split(path, "#")
+	strQ := strings.Split(strD[0], "?")
+	pathRaw := strQ[0]
+	pathQuery := ""
+	for i, str := range strQ {
+		if i != 0 {
+			pathQuery += str
 		}
-	} else {
-		str = "/"
 	}
-	return str
+	strS := strings.Split(pathRaw, "/")
+	for _, str := range strS {
+		if str != "" {
+			rPath += "/" + str
+		}
+	}
+	if rPath == "" {
+		rPath += "/"
+	}
+	if pathQuery != "" {
+		rPath += "?" + pathQuery
+	}
+	return rPath
 }
 
 func RegularRootPath(path string) (str string) {

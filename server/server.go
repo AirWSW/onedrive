@@ -70,14 +70,14 @@ func main() {
 	}
 	gin.SetMode(gin.DebugMode)
 	router := gin.Default()
-	router.GET("/auth", handleGetAuth)
-	router.GET("/drive", handleGetDrive)
-	router.GET("/file", handleGetFile)
-	router.GET("/stream/*path", handleGetStream)
 	router.GET("/onedrive/auth", handleGetAuth)
 	router.GET("/onedrive/drive", handleGetDrive)
 	router.GET("/onedrive/file", handleGetFile)
 	router.GET("/onedrive/stream/*path", handleGetStream)
+	router.GET("/api/onedrive/auth", handleGetAuth)
+	router.GET("/api/onedrive/drive", handleGetDrive)
+	router.GET("/api/onedrive/file", handleGetFile)
+	router.GET("/api/onedrive/stream/*path", handleGetStream)
 	if err := router.Run("localhost:8081"); err != nil {
 		log.Panicln(err)
 	}

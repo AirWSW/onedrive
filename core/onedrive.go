@@ -325,10 +325,13 @@ func (od *OneDrive) GetDriveItemsFromPath(path string) (*DriveItemsPayload, erro
 		LastUpdateAt: driveItemsReferenceCache.LastUpdateAt,
 	}
 	var driveItemPayloads []DriveItemPayload = nil
+	if rPath != "/" {
+		rPath += "/"
+	}
 	if driveItemsReferenceCache.Content != nil {
 		content := driveItemsReferenceCache.Content
 		driveItemsReferencePayload.Content = &DriveItemPayload{
-			Path:           rPath + "/" + content.Name,
+			Path:           rPath + content.Name,
 			Name:           content.Name,
 			Size:           content.Size,
 			ChildCount:     content.ChildCount,
@@ -341,7 +344,7 @@ func (od *OneDrive) GetDriveItemsFromPath(path string) (*DriveItemsPayload, erro
 		driveItems := driveItemsCache.DriveItems
 		for _, driveItem := range driveItems {
 			newDriveItemPayload := DriveItemPayload{
-				Path:           rPath + "/" + driveItem.Name,
+				Path:           rPath + driveItem.Name,
 				Name:           driveItem.Name,
 				Size:           driveItem.Size,
 				ChildCount:     driveItem.ChildCount,

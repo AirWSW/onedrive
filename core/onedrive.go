@@ -231,7 +231,6 @@ func (od *OneDrive) DrivePathToURL(path string) string {
 	reqURL += RegularRootPath(od.DriveDescriptionConfig.RootPath)
 	reqURL += path
 	reqURL += "?expand=children($select=name,size,file,folder,parentReference,createdDateTime,lastModifiedDateTime)"
-	log.Println(reqURL)
 	return reqURL
 }
 
@@ -248,7 +247,6 @@ func (od *OneDrive) DrivePathContentToURL(path string) string {
 	reqURL += RegularRootPath(od.DriveDescriptionConfig.RootPath)
 	reqURL += RegularPath(path)
 	reqURL += ":/content"
-	log.Println(reqURL)
 	return reqURL
 }
 

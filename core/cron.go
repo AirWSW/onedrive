@@ -1,6 +1,7 @@
 package core
 
 import (
+	"log"
 	"time"
 
 	"github.com/robfig/cron/v3"
@@ -13,15 +14,17 @@ func (od *OneDrive) Cron() error {
 		od.GetMicrosoftGraphAPIToken()
 		od.SaveConfigFile()
 	})
-	// Every minuite, starting a minuite from now
-	c.AddFunc("@every 1m", func() {
+	// Every 10 minuites, starting 10 minuites from now
+	c.AddFunc("@every 10s", func() {
+		log.Println("Start CronCacheDrive")
 		od.CronCacheDrive()
-		od.SaveConfigFile()
+		od.SaveDriveCacheFile()
 	})
-	// Every minuite, starting a minuite from now
-	c.AddFunc("@every 1m", func() {
+	// Every 20 minuites, starting 20 minuites from now
+	c.AddFunc("@every 10s", func() {
+		log.Println("Start CronCacheDrivePathContentURL")
 		od.CronCacheDrivePathContentURL()
-		od.SaveConfigFile()
+		od.SaveDriveCacheFile()
 	})
 	c.Start()
 	return nil
@@ -29,7 +32,8 @@ func (od *OneDrive) Cron() error {
 
 func (od *OneDrive) CronCacheDrive() error {
 	for i, item := range od.DriveCacheContentURL {
-		if time.Now().Sub(item.UpdateAt) < time.Second*1200 {
+		if item.UpdateAt-time.Now().Unix() > 1200 {
+			log.Println("Updating: " + item.RequestURL)
 			driveCacheContentURL, err := od.getDriveCacheContentURL(item.RequestURL)
 			if err != nil {
 				return err
@@ -42,7 +46,8 @@ func (od *OneDrive) CronCacheDrive() error {
 
 func (od *OneDrive) CronCacheDrivePathContentURL() error {
 	for i, item := range od.DriveCache {
-		if time.Now().Sub(item.UpdateAt) < time.Second*600 {
+		if item.UpdateAt-time.Now().Unix() > 600 {
+			log.Println("Updating: " + item.RequestURL)
 			driveCache, err := od.getDriveCache(item.Path, item.RequestURL)
 			if err != nil {
 				return err

@@ -54,7 +54,10 @@ func (od *OneDrive) PathToGraphAPIDriveItemsRequestURL(path string) string {
 	reqURL := od.DriveDescriptionConfig.EndPointURI
 	reqURL += "/me"
 	reqURL += RegularRootPath(od.DriveDescriptionConfig.RootPath)
-	reqURL += RegularPath(path)
+	path = RegularPath(path)
+	if path != "/" {
+		reqURL += path
+	}
 	reqURL += ":/children"
 	return reqURL
 }

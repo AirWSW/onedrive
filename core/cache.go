@@ -214,7 +214,8 @@ func (od *OneDrive) getDriveCacheContentURL(reqURL string) (*DriveCacheContentUR
 	if err != nil {
 		return nil, err
 	}
-
+	defer resp.Body.Close()
+	
 	driveCacheContentURL := DriveCacheContentURL{
 		RequestURL:  reqURL,
 		ResponseURL: *resp.Request.URL,

@@ -33,6 +33,10 @@ func handleGetDrive(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 	}
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
+	c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
 	bytes, _ := json.Marshal(driveCache)
 	c.String(http.StatusOK, "%s", bytes)
 }

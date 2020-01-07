@@ -1,7 +1,6 @@
 package core
 
 import (
-	"log"
 	"time"
 
 	"github.com/robfig/cron/v3"

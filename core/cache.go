@@ -311,7 +311,6 @@ func (od *OneDrive) HitDriveItemsCaches(path string) (*DriveItemsCache, error) {
 	}
 	driveItemsCache, err = od.GraphAPIDriveItemsToDriveItemsCache(graphAPIDriveItems)
 	if err != nil {
-		_ = driveItemsCache
 		return nil, err
 	}
 	if driveItemsCache == nil {
@@ -350,7 +349,6 @@ func (od *OneDrive) HitDriveItemCaches(path string) (*DriveItemsCache, error) {
 	}
 	driveItemsCache, err = od.GraphAPIDriveItemsToDriveItemsCache(graphAPIDriveItems)
 	if err != nil {
-		_ = driveItemsCache
 		return nil, err
 	}
 	if driveItemsCache == nil {

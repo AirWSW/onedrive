@@ -28,12 +28,8 @@ func (od *OneDrive) CronCacheDriveItems() error {
 	for i, driveItemsCache := range od.DriveItemsCaches {
 		driveItemsReference := driveItemsCache.DriveItemsReference
 		if time.Now().Unix()-driveItemsReference.LastUpdateAt > 1800 {
-			reqURL := od.DriveDescriptionConfig.EndPointURI
-			reqURL += "/me"
-			reqURL += driveItemsReference.Path
-			reqURL += ":/children"
-			log.Println("Updating: " + reqURL)
-			graphAPIDriveItems, err := od.GetGraphAPIDriveItemsRequest(reqURL)
+			path := od.GraphAPIDriveItemsPathToPath(driveItemsReference.Path)
+			graphAPIDriveItems, err := od.GetGraphAPIDriveItems(path)
 			if err != nil {
 				return err
 			}

@@ -14,6 +14,7 @@ import (
 type GraphAPIDriveItems struct {
 	OdataNextLink *string             `json:"@odata.nextLink"`
 	DriveItems    []GraphAPIDriveItem `json:"value"`
+	Error         *GraphAPIError      `json:"error"`
 }
 
 type GraphAPIDriveItem struct {
@@ -50,6 +51,11 @@ type GraphAPIDriveItemFileHashes struct {
 	Sha1Hash     *string `json:"sha1Hash"`
 }
 
+type GraphAPIError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
 func (od *OneDrive) PathToGraphAPIDriveItemsRequestURL(path string) string {
 	reqURL := od.DriveDescriptionConfig.EndPointURI
 	reqURL += "/me"
@@ -64,7 +70,10 @@ func (od *OneDrive) PathToGraphAPIDriveItemsRequestURL(path string) string {
 
 func (od *OneDrive) PathToGraphAPIDriveItemsPath(path string) string {
 	newPath := RegularRootPath(od.DriveDescriptionConfig.RootPath)
-	newPath += RegularPath(path)
+	path = RegularPath(path)
+	if path != "/" {
+		newPath += path
+	}
 	return newPath
 }
 
@@ -318,13 +327,14 @@ func (od *OneDrive) HitDriveItemsCaches(path string) (*DriveItemsCache, error) {
 		if err == nil {
 			return driveItemsCache, nil
 		}
-		driveItemsReference := DriveItemsReferenceCache{
-			Path:         od.PathToGraphAPIDriveItemsPath(path),
-			LastUpdateAt: time.Now().Unix(),
-		}
-		driveItemsCache = &DriveItemsCache{
-			DriveItemsReference: driveItemsReference,
-		}
+		return nil, err
+		// driveItemsReference := DriveItemsReferenceCache{
+		// 	Path:         od.PathToGraphAPIDriveItemsPath(path),
+		// 	LastUpdateAt: time.Now().Unix(),
+		// }
+		// driveItemsCache = &DriveItemsCache{
+		// 	DriveItemsReference: driveItemsReference,
+		// }
 	}
 	od.DriveItemsCaches = append(od.DriveItemsCaches, *driveItemsCache)
 
@@ -342,6 +352,10 @@ func (od *OneDrive) HitDriveItemCaches(path string) (*DriveItemsCache, error) {
 		return driveItemsCache, nil
 	}
 	subPath, _ := RegularPathToPathFilename(path)
+	driveItemsCache, err = od.GetGraphAPIDriveItemsFromCache(subPath)
+	if err == nil {
+		return driveItemsCache, nil
+	}
 
 	graphAPIDriveItems, err := od.GetGraphAPIDriveItems(subPath)
 	if err != nil {

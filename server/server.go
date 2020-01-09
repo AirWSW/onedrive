@@ -49,6 +49,7 @@ func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 		c.String(http.StatusOK, "%s", bytes)
 		return
 	}
+	AddDefalutHeaders(c)
 	c.AbortWithStatus(http.StatusNotFound)
 }
 

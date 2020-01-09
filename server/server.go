@@ -50,7 +50,10 @@ func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 		c.String(http.StatusOK, "%s", bytes)
 		return
 	}
-	AddDefalutHeaders(c)
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
+	c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
 	c.AbortWithStatus(http.StatusNotFound)
 }
 
@@ -61,7 +64,10 @@ func handleGetMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 	}
-	AddDefalutHeaders(c)
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
+	c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
 	c.String(http.StatusOK, "%s", bytes)
 }
 
@@ -73,7 +79,10 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 	}
 	if microsoftGraphDriveItemCache != nil {
 		if microsoftGraphDriveItemCache.DownloadURL != nil {
-			AddDefalutHeaders(c)
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+			c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
+			c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
 			c.Redirect(http.StatusFound, *microsoftGraphDriveItemCache.DownloadURL)
 			return
 		}

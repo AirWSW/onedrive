@@ -7,7 +7,7 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-func (od *OneDrive) Cron() error {
+func (od *OldOneDrive) Cron() error {
 	c := cron.New(cron.WithSeconds())
 	// Every half hour, starting a half hour from now
 	c.AddFunc("@every 30m", func() {
@@ -24,7 +24,7 @@ func (od *OneDrive) Cron() error {
 	return nil
 }
 
-func (od *OneDrive) CronCacheDriveItems() error {
+func (od *OldOneDrive) CronCacheDriveItems() error {
 	for i, driveItemsCache := range od.DriveItemsCaches {
 		driveItemsReference := driveItemsCache.DriveItemsReference
 		if time.Now().Unix()-driveItemsReference.LastUpdateAt > 1800 {

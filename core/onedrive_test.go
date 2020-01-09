@@ -6,6 +6,52 @@ import (
 	"testing"
 )
 
+func TestCreateOneDriveCollectionFromConfigFile(t *testing.T) {
+	odc, err := NewOneDriveCollectionFromConfigFile()
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	ods := odc.OneDrives
+	od := ods[0]
+	if od.AzureADAppRegistration.DisplayName != nil {
+		t.Logf("%s", *od.AzureADAppRegistration.DisplayName)
+	}
+	t.Logf("%s", od.AzureADAppRegistration.ClientID)
+	if od.AzureADAppRegistration.TenantID != nil {
+		t.Logf("%s", *od.AzureADAppRegistration.TenantID)
+	}
+	if od.AzureADAppRegistration.ObjectID != nil {
+		t.Logf("%s", *od.AzureADAppRegistration.ObjectID)
+	}
+	if od.AzureADAppRegistration.ObjectID != nil {
+		t.Logf("%s", *od.AzureADAppRegistration.ObjectID)
+	}
+	t.Logf("%s", od.AzureADAppRegistration.RedirectURIs)
+	if od.AzureADAppRegistration.LogoutURL != nil {
+		t.Logf("%s", *od.AzureADAppRegistration.LogoutURL)
+	}
+	t.Logf("%s", od.AzureADAppRegistration.ClientSecret)
+	if od.MicrosoftEndPoints.AzureADPortalEndPointURL != nil {
+		t.Logf("%s", *od.MicrosoftEndPoints.AzureADPortalEndPointURL)
+	}
+	t.Logf("%s", od.MicrosoftEndPoints.AzureADEndPointURL)
+	t.Logf("%s", od.MicrosoftEndPoints.MicrosoftGraphAPIEndPointURL)
+
+	input := &NewMicrosoftGraphAPIInput{
+		MicrosoftEndPoints:     &od.MicrosoftEndPoints,
+		AzureADAppRegistration: &od.AzureADAppRegistration,
+		AzureADAuthFlowContext: &od.AzureADAuthFlowContext,
+	}
+	od.MicrosoftGraphAPI, err = NewMicrosoftGraphAPI(input)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	od.MicrosoftGraphAPI.GetMicrosoftGraphAPIToken()
+	t.Logf("%s", od.MicrosoftGraphAPI.MicrosoftGraphAPIToken.AccessToken)
+}
+
 func TestRegularPath(t *testing.T) {
 	strO := ""
 	// strO := "//video.airw.cf/tv.shows////joy.of.life.s01.2019//////e02?t=123456?123&123456"

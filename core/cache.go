@@ -102,8 +102,8 @@ func (od *OneDrive) DriveItemToCache(microsoftGraphDriveItem *graphapi.Microsoft
 func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *MicrosoftGraphDriveItemCache) (*DriveItemCachePayload, error) {
 	innerDriveItemCachePayload := []DriveItemCachePayload{}
 	newDriveItemCachePayload := DriveItemCachePayload{}
-	innerDownloadURL := od.OneDriveDescription.DriveRootPathToRelativePath(microsoftGraphDriveItemCache.ParentReference.Path)
 	for _, children := range microsoftGraphDriveItemCache.Children {
+		innerDownloadURL := od.OneDriveDescription.DriveRootPathToRelativePath(microsoftGraphDriveItemCache.ParentReference.Path)
 		innerDownloadURL += "/" + children.Name
 		innerDownloadURLPointer := &innerDownloadURL
 		if children.Folder != nil {
@@ -241,13 +241,18 @@ func (od *OneDrive) HitMicrosoftGraphDriveItemCache(path string) (*MicrosoftGrap
 func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayload, error) {
 	newPath := RegularPath(path)
 	newPathLength := len(newPath)
+	parentPath, filename := RegularPathToPathFilename(path)
+	driveVolumeMountRule := &DriveVolumeMount{}
 	for _, driveVolumeMount := range od.OneDriveDescription.DriveVolumeMounts {
 		target := RegularPath(*driveVolumeMount.Target)
 		targetLength := len(target)
 		if newPathLength >= targetLength && newPath[0:targetLength] == target {
 			newPath = RegularPath(*driveVolumeMount.Source) + newPath[targetLength:newPathLength]
+			driveVolumeMountRule = &driveVolumeMount
+			continue
 		}
 	}
+
 	microsoftGraphDriveItemCache, err := od.HitMicrosoftGraphDriveItemCache(newPath)
 	go od.CronCacheMicrosoftGraphDrive()
 	if err != nil {
@@ -258,29 +263,35 @@ func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayl
 		return nil, err
 	}
 
-	parentPath, filename := RegularPathToPathFilename(path)
-	driveItemCachePayload.ParentReference.Path = RegularPath(parentPath)
-	driveItemCachePayload.Name = filename
-	innerDriveItemCachePayload := []DriveItemCachePayload{}
-	newDriveItemCachePayload := DriveItemCachePayload{}
-	innerDownloadURL := od.OneDriveDescription.DriveRootPathToRelativePath(microsoftGraphDriveItemCache.ParentReference.Path)
-	for _, children := range driveItemCachePayload.Children {
-		innerDownloadURL += "/" + children.Name
-		innerDownloadURLPointer := &innerDownloadURL
-		if children.Folder != nil {
-			innerDownloadURLPointer = nil
+	if newPath != RegularPath(path) {
+		if driveVolumeMountRule.Type != nil {
+			if *driveVolumeMountRule.Type == "file.only" && driveItemCachePayload.File == nil {
+				return nil, errors.New("file.only")
+			}
 		}
-		newDriveItemCachePayload = DriveItemCachePayload{
-			Description:    children.Description,
-			File:           children.File,
-			Folder:         children.Folder,
-			Size:           children.Size,
-			CreatedAt:      children.CreatedAt,
-			LastModifiedAt: children.LastModifiedAt,
-			Name:           children.Name,
-			DownloadURL:    innerDownloadURLPointer,
+		driveItemCachePayload.ParentReference.Path = RegularPath(parentPath)
+		driveItemCachePayload.Name = filename
+		innerDriveItemCachePayload := []DriveItemCachePayload{}
+		newDriveItemCachePayload := DriveItemCachePayload{}
+		for _, children := range driveItemCachePayload.Children {
+			innerDownloadURL := od.OneDriveDescription.DriveRootPathToRelativePath(microsoftGraphDriveItemCache.ParentReference.Path)
+			innerDownloadURL += "/" + children.Name
+			innerDownloadURLPointer := &innerDownloadURL
+			if children.Folder != nil {
+				innerDownloadURLPointer = nil
+			}
+			newDriveItemCachePayload = DriveItemCachePayload{
+				Description:    children.Description,
+				File:           children.File,
+				Folder:         children.Folder,
+				Size:           children.Size,
+				CreatedAt:      children.CreatedAt,
+				LastModifiedAt: children.LastModifiedAt,
+				Name:           children.Name,
+				DownloadURL:    innerDownloadURLPointer,
+			}
+			innerDriveItemCachePayload = append(innerDriveItemCachePayload, newDriveItemCachePayload)
 		}
-		innerDriveItemCachePayload = append(innerDriveItemCachePayload, newDriveItemCachePayload)
 	}
 
 	return driveItemCachePayload, nil

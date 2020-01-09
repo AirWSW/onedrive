@@ -47,6 +47,7 @@ func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 			log.Println(err)
 		}
 		c.String(http.StatusOK, "%s", bytes)
+		return
 	}
 	c.AbortWithStatus(http.StatusNotFound)
 }
@@ -71,6 +72,7 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 		if microsoftGraphDriveItemCache.DownloadURL != nil {
 			AddDefalutHeaders(c)
 			c.Redirect(http.StatusFound, *microsoftGraphDriveItemCache.DownloadURL)
+			return
 		}
 	}
 	c.AbortWithStatus(http.StatusNotFound)

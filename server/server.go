@@ -59,6 +59,7 @@ func handleGetMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 	}
+	AddDefalutHeaders(c)
 	c.String(http.StatusOK, "%s", bytes)
 }
 

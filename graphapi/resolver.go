@@ -1,5 +1,12 @@
 package graphapi
 
+func (e *MicrosoftEndPoints) Set(input *MicrosoftEndPoints) error {
+	e.AzureADPortalEndPointURL = input.AzureADPortalEndPointURL
+	e.AzureADEndPointURL = input.AzureADEndPointURL
+	e.MicrosoftGraphAPIEndPointURL = input.MicrosoftGraphAPIEndPointURL
+	return nil
+}
+
 func (e *MicrosoftEndPoints) GetAzureADAuthorizeEndPointURL() string {
 	return e.AzureADEndPointURL + "/common/oauth2/v2.0/authorize"
 }
@@ -12,11 +19,8 @@ func (e *MicrosoftEndPoints) GetMicrosoftGraphAPIEndPointURL() string {
 	return e.MicrosoftGraphAPIEndPointURL + "/v1.0"
 }
 
-func (e *MicrosoftEndPoints) Set(input *MicrosoftEndPoints) error {
-	e.AzureADPortalEndPointURL = input.AzureADPortalEndPointURL
-	e.AzureADEndPointURL = input.AzureADEndPointURL
-	e.MicrosoftGraphAPIEndPointURL = input.MicrosoftGraphAPIEndPointURL
-	return nil
+func (e *MicrosoftEndPoints) UseMicrosoftGraphAPIEndPointURL(str string) string {
+	return e.GetMicrosoftGraphAPIEndPointURL() + str
 }
 
 func (r *AzureADAppRegistration) Set(input *AzureADAppRegistration) error {
@@ -50,4 +54,8 @@ func (t *MicrosoftGraphAPIToken) Set(input *MicrosoftGraphAPIToken) error {
 	t.AccessToken = input.AccessToken
 	t.RefreshToken = input.RefreshToken
 	return nil
+}
+
+func (t *MicrosoftGraphAPIToken) GetAuthorizationString() string {
+	return t.TokenType + " " + t.AccessToken
 }

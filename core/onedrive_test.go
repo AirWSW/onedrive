@@ -6,51 +6,51 @@ import (
 	"testing"
 )
 
-func TestCreateOneDriveCollectionFromConfigFile(t *testing.T) {
-	odc, err := NewOneDriveCollectionFromConfigFile()
-	if err != nil {
-		t.Fatalf("%s", err)
-	}
+// func TestCreateOneDriveCollectionFromConfigFile(t *testing.T) {
+// 	odc, err := NewOneDriveCollectionFromConfigFile()
+// 	if err != nil {
+// 		t.Fatalf("%s", err)
+// 	}
 
-	ods := odc.OneDrives
-	od := ods[0]
-	if od.AzureADAppRegistration.DisplayName != nil {
-		t.Logf("%s", *od.AzureADAppRegistration.DisplayName)
-	}
-	t.Logf("%s", od.AzureADAppRegistration.ClientID)
-	if od.AzureADAppRegistration.TenantID != nil {
-		t.Logf("%s", *od.AzureADAppRegistration.TenantID)
-	}
-	if od.AzureADAppRegistration.ObjectID != nil {
-		t.Logf("%s", *od.AzureADAppRegistration.ObjectID)
-	}
-	if od.AzureADAppRegistration.ObjectID != nil {
-		t.Logf("%s", *od.AzureADAppRegistration.ObjectID)
-	}
-	t.Logf("%s", od.AzureADAppRegistration.RedirectURIs)
-	if od.AzureADAppRegistration.LogoutURL != nil {
-		t.Logf("%s", *od.AzureADAppRegistration.LogoutURL)
-	}
-	t.Logf("%s", od.AzureADAppRegistration.ClientSecret)
-	if od.MicrosoftEndPoints.AzureADPortalEndPointURL != nil {
-		t.Logf("%s", *od.MicrosoftEndPoints.AzureADPortalEndPointURL)
-	}
-	t.Logf("%s", od.MicrosoftEndPoints.AzureADEndPointURL)
-	t.Logf("%s", od.MicrosoftEndPoints.MicrosoftGraphAPIEndPointURL)
+// 	ods := odc.OneDrives
+// 	od := ods[0]
+// 	if od.AzureADAppRegistration.DisplayName != nil {
+// 		t.Logf("%s", *od.AzureADAppRegistration.DisplayName)
+// 	}
+// 	t.Logf("%s", od.AzureADAppRegistration.ClientID)
+// 	if od.AzureADAppRegistration.TenantID != nil {
+// 		t.Logf("%s", *od.AzureADAppRegistration.TenantID)
+// 	}
+// 	if od.AzureADAppRegistration.ObjectID != nil {
+// 		t.Logf("%s", *od.AzureADAppRegistration.ObjectID)
+// 	}
+// 	if od.AzureADAppRegistration.ObjectID != nil {
+// 		t.Logf("%s", *od.AzureADAppRegistration.ObjectID)
+// 	}
+// 	t.Logf("%s", od.AzureADAppRegistration.RedirectURIs)
+// 	if od.AzureADAppRegistration.LogoutURL != nil {
+// 		t.Logf("%s", *od.AzureADAppRegistration.LogoutURL)
+// 	}
+// 	t.Logf("%s", od.AzureADAppRegistration.ClientSecret)
+// 	if od.MicrosoftEndPoints.AzureADPortalEndPointURL != nil {
+// 		t.Logf("%s", *od.MicrosoftEndPoints.AzureADPortalEndPointURL)
+// 	}
+// 	t.Logf("%s", od.MicrosoftEndPoints.AzureADEndPointURL)
+// 	t.Logf("%s", od.MicrosoftEndPoints.MicrosoftGraphAPIEndPointURL)
 
-	input := &NewMicrosoftGraphAPIInput{
-		MicrosoftEndPoints:     &od.MicrosoftEndPoints,
-		AzureADAppRegistration: &od.AzureADAppRegistration,
-		AzureADAuthFlowContext: &od.AzureADAuthFlowContext,
-	}
-	od.MicrosoftGraphAPI, err = NewMicrosoftGraphAPI(input)
-	if err != nil {
-		t.Fatalf("%s", err)
-	}
+// 	input := &NewMicrosoftGraphAPIInput{
+// 		MicrosoftEndPoints:     &od.MicrosoftEndPoints,
+// 		AzureADAppRegistration: &od.AzureADAppRegistration,
+// 		AzureADAuthFlowContext: &od.AzureADAuthFlowContext,
+// 	}
+// 	od.MicrosoftGraphAPI, err = NewMicrosoftGraphAPI(input)
+// 	if err != nil {
+// 		t.Fatalf("%s", err)
+// 	}
 
-	od.MicrosoftGraphAPI.GetMicrosoftGraphAPIToken()
-	t.Logf("%s", od.MicrosoftGraphAPI.MicrosoftGraphAPIToken.AccessToken)
-}
+// 	od.MicrosoftGraphAPI.GetMicrosoftGraphAPIToken()
+// 	t.Logf("%s", od.MicrosoftGraphAPI.MicrosoftGraphAPIToken.AccessToken)
+// }
 
 func TestRegularPath(t *testing.T) {
 	strO := ""
@@ -125,4 +125,13 @@ func TestURL(t *testing.T) {
 	t.Logf(strO)
 	endPointURI, _ := url.Parse(strO)
 	t.Logf("path %s", endPointURI.Host)
+}
+
+func TestURL2(t *testing.T) {
+	strO := "/me"
+	length := len(strO)
+	if length <= 3 {
+		t.Logf("/")
+	}
+	t.Logf(strO[3:length])
 }

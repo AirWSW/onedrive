@@ -5,105 +5,105 @@ import (
 )
 
 type NewMicrosoftGraphAPIInput struct {
-	MicrosoftEndPoints     *MicrosoftEndPoints     `json:"microsoftEndPoints"`
-	AzureADAppRegistration *AzureADAppRegistration `json:"azureAdAppRegistration"`
-	AzureADAuthFlowContext *AzureADAuthFlowContext `json:"azureAdAuthFlowContext"`
+	MicrosoftEndPoints     *MicrosoftEndPoints     `json:"microsoftEndPoints,omitempty"`
+	AzureADAppRegistration *AzureADAppRegistration `json:"azureAdAppRegistration,omitempty"`
+	AzureADAuthFlowContext *AzureADAuthFlowContext `json:"azureAdAuthFlowContext,omitempty"`
 }
 
 type MicrosoftGraphAPI struct {
 	MicrosoftEndPoints     MicrosoftEndPoints      `json:"microsoftEndPoints"`
 	AzureADAppRegistration AzureADAppRegistration  `json:"azureAdAppRegistration"`
 	AzureADAuthFlowContext AzureADAuthFlowContext  `json:"azureAdAuthFlowContext"`
-	MicrosoftGraphAPIToken *MicrosoftGraphAPIToken `json:"microsoftGraphApiToken"`
+	MicrosoftGraphAPIToken *MicrosoftGraphAPIToken `json:"microsoftGraphApiToken,omitempty"`
 }
 
 type MicrosoftEndPoints struct {
-	AzureADPortalEndPointURL     *string `json:"azureAdPortalEndPointUrl"`
+	AzureADPortalEndPointURL     *string `json:"azureAdPortalEndPointUrl,omitempty"`
 	AzureADEndPointURL           string  `json:"azureAdEndPointUrl"`
 	MicrosoftGraphAPIEndPointURL string  `json:"microsoftgraphApiEndPointUrl"`
 }
 
 type AzureADAppRegistration struct {
-	DisplayName  *string  `json:"displayName"`
+	DisplayName  *string  `json:"displayName,omitempty"`
 	ClientID     string   `json:"clientId"`
-	TenantID     *string  `json:"tenantId"`
-	ObjectID     *string  `json:"objectId"`
+	TenantID     *string  `json:"tenantId,omitempty"`
+	ObjectID     *string  `json:"objectId,omitempty"`
 	RedirectURIs []string `json:"redirectUris"`
-	LogoutURL    *string  `json:"logoutUrl"`
+	LogoutURL    *string  `json:"logoutUrl,omitempty"`
 	ClientSecret string   `json:"clientSecret"`
 }
 
 type AzureADAuthFlowContext struct {
 	GrantScope   string  `json:"grantScope"`
-	Code         *string `json:"code"`
-	RefreshToken *string `json:"refreshToken"`
+	Code         *string `json:"code,omitempty"`
+	RefreshToken *string `json:"refreshToken,omitempty"`
 }
 
 type MicrosoftGraphAPIToken struct {
 	TokenType    string  `json:"token_type"`
 	ExpiresIn    int32   `json:"expires_in"`
-	ExtExpiresIn *int32  `json:"ext_expires_in"`
+	ExtExpiresIn *int32  `json:"ext_expires_in,omitempty"`
 	Scope        string  `json:"scope"`
 	AccessToken  string  `json:"access_token"`
-	RefreshToken *string `json:"refresh_token"`
+	RefreshToken *string `json:"refresh_token,omitempty"`
 }
 
 // MicrosoftGraphBaseItem  "@odata.type": "microsoft.graph.baseItem"
 type MicrosoftGraphBaseItem struct {
 	ID                   string                       `json:"id"` // identifier
-	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy"`
-	CreatedDateTime      *time.Time                   `json:"createdDateTime"`
+	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy,omitempty"`
+	CreatedDateTime      *time.Time                   `json:"createdDateTime,omitempty"`
 	Description          string                       `json:"description"`
 	ETag                 string                       `json:"eTag"`
-	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy"`
+	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy,omitempty"`
 	LastModifiedDateTime time.Time                    `json:"lastModifiedDateTime"`
 	Name                 string                       `json:"name"`
-	ParentReference      *MicrosoftGraphItemReference `json:"parentReference"`
+	ParentReference      *MicrosoftGraphItemReference `json:"parentReference,omitempty"`
 	WebURL               string                       `json:"webUrl"`
 }
 
 // MicrosoftGraphDriveItem  "@odata.type": "microsoft.graph.driveItem"
 type MicrosoftGraphDriveItem struct {
-	Audio          *MicrosoftGraphAudio            `json:"audio"`
-	Content        *EdmDotStream                   `json:"content"`
+	Audio          *MicrosoftGraphAudio            `json:"audio,omitempty"`
+	Content        *EdmDotStream                   `json:"content,omitempty"`
 	CTag           string                          `json:"cTag"` // etag
-	Deleted        *MicrosoftGraphDeleted          `json:"deleted"`
+	Deleted        *MicrosoftGraphDeleted          `json:"deleted,omitempty"`
 	Description    string                          `json:"description"`
-	File           *MicrosoftGraphFile             `json:"file"`
-	FileSystemInfo *MicrosoftGraphFileSystemInfo   `json:"fileSystemInfo"`
-	Folder         *MicrosoftGraphFolder           `json:"folder"`
-	Image          *MicrosoftGraphImage            `json:"image"`
-	Location       *MicrosoftGraphGEOCoordinates   `json:"location"`
-	Malware        *MicrosoftGraphMalware          `json:"malware"`
-	Package        *MicrosoftGraphPackage          `json:"package"`
-	Photo          *MicrosoftGraphPhoto            `json:"photo"`
-	Publication    *MicrosoftGraphPublicationFacet `json:"publication"`
-	RemoteItem     *MicrosoftGraphRemoteItem       `json:"remoteItem"`
-	Root           *MicrosoftGraphRoot             `json:"root"`
-	SearchResult   *MicrosoftGraphSearchResult     `json:"searchResult"`
-	Shared         *MicrosoftGraphShared           `json:"shared"`
-	SharepointIDs  *MicrosoftGraphSharepointIDs    `json:"sharepointIds"`
+	File           *MicrosoftGraphFile             `json:"file,omitempty"`
+	FileSystemInfo *MicrosoftGraphFileSystemInfo   `json:"fileSystemInfo,omitempty"`
+	Folder         *MicrosoftGraphFolder           `json:"folder,omitempty"`
+	Image          *MicrosoftGraphImage            `json:"image,omitempty"`
+	Location       *MicrosoftGraphGEOCoordinates   `json:"location,omitempty"`
+	Malware        *MicrosoftGraphMalware          `json:"malware,omitempty"`
+	Package        *MicrosoftGraphPackage          `json:"package,omitempty"`
+	Photo          *MicrosoftGraphPhoto            `json:"photo,omitempty"`
+	Publication    *MicrosoftGraphPublicationFacet `json:"publication,omitempty"`
+	RemoteItem     *MicrosoftGraphRemoteItem       `json:"remoteItem,omitempty"`
+	Root           *MicrosoftGraphRoot             `json:"root,omitempty"`
+	SearchResult   *MicrosoftGraphSearchResult     `json:"searchResult,omitempty"`
+	Shared         *MicrosoftGraphShared           `json:"shared,omitempty"`
+	SharepointIDs  *MicrosoftGraphSharepointIDs    `json:"sharepointIds,omitempty"`
 	Size           int64                           `json:"size"`
-	SpecialFolder  *MicrosoftGraphSpecialFolder    `json:"specialFolder"`
-	Video          *MicrosoftGraphVideo            `json:"video"`
-	WebDavURL      string                          `json:"webDavUrl"`
+	SpecialFolder  *MicrosoftGraphSpecialFolder    `json:"specialFolder,omitempty"`
+	Video          *MicrosoftGraphVideo            `json:"video,omitempty"`
+	WebDavURL      *string                         `json:"webDavUrl,omitempty"`
 
 	/* relationships */
-	Activities  []MicrosoftGraphItemActivity     `json:"activities"`
-	Children    []MicrosoftGraphDriveItem        `json:"children"`
-	Permissions []MicrosoftGraphPermission       `json:"permissions"`
-	Thumbnails  []MicrosoftGraphThumbnailSet     `json:"thumbnails"`
-	Versions    []MicrosoftGraphDriveItemVersion `json:"versions"`
+	Activities  []MicrosoftGraphItemActivity     `json:"activities,omitempty"`
+	Children    []MicrosoftGraphDriveItem        `json:"children,omitempty"`
+	Permissions []MicrosoftGraphPermission       `json:"permissions,omitempty"`
+	Thumbnails  []MicrosoftGraphThumbnailSet     `json:"thumbnails,omitempty"`
+	Versions    []MicrosoftGraphDriveItemVersion `json:"versions,omitempty"`
 
 	/* inherited from baseItem */
 	ID                   string                       `json:"id"` // identifier
-	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy"`
-	CreatedDateTime      *time.Time                   `json:"createdDateTime"`
+	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy,omitempty"`
+	CreatedDateTime      *time.Time                   `json:"createdDateTime,omitempty"`
 	ETag                 string                       `json:"eTag"`
-	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy"`
-	LastModifiedDateTime *time.Time                   `json:"lastModifiedDateTime"`
+	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy,omitempty"`
+	LastModifiedDateTime *time.Time                   `json:"lastModifiedDateTime,omitempty"`
 	Name                 string                       `json:"name"`
-	ParentReference      *MicrosoftGraphItemReference `json:"parentReference"`
+	ParentReference      *MicrosoftGraphItemReference `json:"parentReference,omitempty"`
 	WebURL               string                       `json:"webUrl"`
 
 	/* instance annotations */
@@ -115,7 +115,7 @@ type MicrosoftGraphDriveItem struct {
 // MicrosoftGraphDriveItemCollection "@odata.type": "microsoft.graph.driveItemCollection"
 type MicrosoftGraphDriveItemCollection struct {
 	Value           []MicrosoftGraphDriveItem `json:"value"`
-	AtODataNextLink string                    `json:"@odata.nextLink"`
+	AtODataNextLink *string                   `json:"@odata.nextLink,omitempty"`
 }
 
 // MicrosoftGraphAudio "@odata.type": "microsoft.graph.audio"
@@ -145,17 +145,17 @@ type EdmDotStream struct {
 
 // MicrosoftGraphIdentitySet "@odata.type": "microsoft.graph.identitySet"
 type MicrosoftGraphIdentitySet struct {
-	Application *MicrosoftGraphIdentity `json:"application"`
-	Device      *MicrosoftGraphIdentity `json:"device"`
-	Group       *MicrosoftGraphIdentity `json:"group"`
-	User        *MicrosoftGraphIdentity `json:"user"`
+	Application *MicrosoftGraphIdentity `json:"application,omitempty"`
+	Device      *MicrosoftGraphIdentity `json:"device,omitempty"`
+	Group       *MicrosoftGraphIdentity `json:"group,omitempty"`
+	User        *MicrosoftGraphIdentity `json:"user,omitempty"`
 }
 
 // MicrosoftGraphIdentity "@odata.type": "microsoft.graph.identity"
 type MicrosoftGraphIdentity struct {
 	DisplayName string                      `json:"displayName"`
 	ID          string                      `json:"id"`
-	Thumbnails  *MicrosoftGraphThumbnailSet `json:"thumbnails"`
+	Thumbnails  *MicrosoftGraphThumbnailSet `json:"thumbnails,omitempty"`
 }
 
 // MicrosoftGraphDeleted "@odata.type": "microsoft.graph.deleted"
@@ -165,29 +165,29 @@ type MicrosoftGraphDeleted struct {
 
 // MicrosoftGraphFile "@odata.type": "microsoft.graph.file"
 type MicrosoftGraphFile struct {
-	Hashes             string `json:"hashes"`
-	MimeType           string `json:"mimeType"`
-	ProcessingMetadata bool   `json:"processingMetadata"`
+	Hashes             *MicrosoftGraphHashes `json:"hashes,omitempty"`
+	MimeType           string                `json:"mimeType"`
+	ProcessingMetadata *bool                 `json:"processingMetadata,omitempty"`
 }
 
 // MicrosoftGraphHashes "@odata.type": "microsoft.graph.hashes"
 type MicrosoftGraphHashes struct {
-	CRC32Hash    string `json:"crc32Hash"`    // hex
-	SHA1Hash     string `json:"sha1Hash"`     // hex
-	QuickXorHash string `json:"quickXorHash"` // base64
+	CRC32Hash    *string `json:"crc32Hash,omitempty"`    // hex
+	SHA1Hash     *string `json:"sha1Hash,omitempty"`     // hex
+	QuickXorHash *string `json:"quickXorHash,omitempty"` // base64
 }
 
 // MicrosoftGraphFileSystemInfo "@odata.type": "microsoft.graph.fileSystemInfo"
 type MicrosoftGraphFileSystemInfo struct {
-	CreatedDateTime      *time.Time `json:"createdDateTime"`
-	LastAccessedDateTime *time.Time `json:"lastAccessedDateTime"`
-	LastModifiedDateTime *time.Time `json:"lastModifiedDateTime"`
+	CreatedDateTime      *time.Time `json:"createdDateTime,omitempty"`
+	LastAccessedDateTime *time.Time `json:"lastAccessedDateTime,omitempty"`
+	LastModifiedDateTime *time.Time `json:"lastModifiedDateTime,omitempty"`
 }
 
 // MicrosoftGraphFolder "@odata.type": "microsoft.graph.folder"
 type MicrosoftGraphFolder struct {
 	ChildCount int32                     `json:"childCount"`
-	View       *MicrosoftGraphFolderView `json:"view"`
+	View       *MicrosoftGraphFolderView `json:"view,omitempty"`
 }
 
 // MicrosoftGraphFolderView "@odata.type": "microsoft.graph.folderView"
@@ -232,12 +232,12 @@ type MicrosoftGraphItemReference struct {
 	DriveID       string                       `json:"driveId"`
 	DriveType     string                       `json:"driveType"` // personal, business, documentLibrary
 	ID            string                       `json:"id"`
-	ListID        string                       `json:"listId"`
-	Name          string                       `json:"name"`
+	ListID        *string                      `json:"listId,omitempty"`
+	Name          *string                      `json:"name,omitempty"`
 	Path          string                       `json:"path"`
-	ShareID       string                       `json:"shareId"`
-	SharepointIDs *MicrosoftGraphSharepointIDs `json:"sharepointIds"`
-	SiteID        string                       `json:"siteId"`
+	ShareID       *string                      `json:"shareId,omitempty"`
+	SharepointIDs *MicrosoftGraphSharepointIDs `json:"sharepointIds,omitempty"`
+	SiteID        *string                      `json:"siteId,omitempty"`
 }
 
 // MicrosoftGraphSharepointIDs "@odata.type": "microsoft.graph.sharepointIds"
@@ -260,7 +260,7 @@ type MicrosoftGraphPhoto struct {
 	FNumber             float64    `json:"fNumber"`
 	FocalLength         float64    `json:"focalLength"`
 	ISO                 int32      `json:"iso"`
-	TakenDateTime       *time.Time `json:"takenDateTime"`
+	TakenDateTime       *time.Time `json:"takenDateTime,omitempty"`
 }
 
 // MicrosoftGraphPublicationFacet "@odata.type": "microsoft.graph.publicationFacet"
@@ -272,19 +272,19 @@ type MicrosoftGraphPublicationFacet struct {
 // MicrosoftGraphRemoteItem "@odata.type": "microsoft.graph.remoteItem"
 type MicrosoftGraphRemoteItem struct {
 	ID                   string                        `json:"id"` // identifier
-	CreatedBy            *MicrosoftGraphIdentitySet    `json:"createdBy"`
-	CreatedDateTime      *time.Time                    `json:"createdDateTime"`
-	File                 *MicrosoftGraphFile           `json:"file"`
-	FileSystemInfo       *MicrosoftGraphFileSystemInfo `json:"fileSystemInfo"`
-	Folder               *MicrosoftGraphFolder         `json:"folder"`
-	LastModifiedBy       *MicrosoftGraphIdentitySet    `json:"lastModifiedBy"`
-	LastModifiedDateTime *time.Time                    `json:"lastModifiedDateTime"`
+	CreatedBy            *MicrosoftGraphIdentitySet    `json:"createdBy,omitempty"`
+	CreatedDateTime      *time.Time                    `json:"createdDateTime,omitempty"`
+	File                 *MicrosoftGraphFile           `json:"file,omitempty"`
+	FileSystemInfo       *MicrosoftGraphFileSystemInfo `json:"fileSystemInfo,omitempty"`
+	Folder               *MicrosoftGraphFolder         `json:"folder,omitempty"`
+	LastModifiedBy       *MicrosoftGraphIdentitySet    `json:"lastModifiedBy,omitempty"`
+	LastModifiedDateTime *time.Time                    `json:"lastModifiedDateTime,omitempty"`
 	Name                 string                        `json:"name"`
-	Package              *MicrosoftGraphPackage        `json:"package"`
-	ParentReference      *MicrosoftGraphItemReference  `json:"parentReference"`
-	Shared               *MicrosoftGraphShared         `json:"shared"`
-	SharepointIDs        *MicrosoftGraphSharepointIDs  `json:"sharepointIds"`
-	SpecialFolder        *MicrosoftGraphSpecialFolder  `json:"specialFolder"`
+	Package              *MicrosoftGraphPackage        `json:"package,omitempty"`
+	ParentReference      *MicrosoftGraphItemReference  `json:"parentReference,omitempty"`
+	Shared               *MicrosoftGraphShared         `json:"shared,omitempty"`
+	SharepointIDs        *MicrosoftGraphSharepointIDs  `json:"sharepointIds,omitempty"`
+	SpecialFolder        *MicrosoftGraphSpecialFolder  `json:"specialFolder,omitempty"`
 	Size                 int64                         `json:"size"`
 	WebDavURL            string                        `json:"webDavUrl"`
 	WebURL               string                        `json:"webUrl"`
@@ -308,10 +308,10 @@ type MicrosoftGraphSearchResult struct {
 
 // MicrosoftGraphShared "@odata.type": "microsoft.graph.shared"
 type MicrosoftGraphShared struct {
-	Owner          *MicrosoftGraphIdentitySet `json:"owner"`
+	Owner          *MicrosoftGraphIdentitySet `json:"owner,omitempty"`
 	Scope          string                     `json:"scope"` // anonymous, organization, users
-	SharedBy       *MicrosoftGraphIdentitySet `json:"sharedBy"`
-	SharedDateTime *time.Time                 `json:"sharedDateTime"`
+	SharedBy       *MicrosoftGraphIdentitySet `json:"sharedBy,omitempty"`
+	SharedDateTime *time.Time                 `json:"sharedDateTime,omitempty"`
 }
 
 // MicrosoftGraphSpecialFolder "@odata.type": "microsoft.graph.specialFolder"
@@ -336,34 +336,34 @@ type MicrosoftGraphVideo struct {
 // MicrosoftGraphItemActivity "@odata.type": "microsoft.graph.itemActivity"
 type MicrosoftGraphItemActivity struct {
 	ID     string                             `json:"id"` // identifier
-	Action *MicrosoftGraphItemActionSet       `json:"action"`
-	Actor  *MicrosoftGraphIdentitySet         `json:"actor"`
-	Times  *MicrosoftGraphitemActivityTimeSet `json:"times"`
+	Action *MicrosoftGraphItemActionSet       `json:"action,omitempty"`
+	Actor  *MicrosoftGraphIdentitySet         `json:"actor,omitempty"`
+	Times  *MicrosoftGraphitemActivityTimeSet `json:"times,omitempty"`
 
 	/* relationships */
-	DriveItem *MicrosoftGraphDriveItem `json:"driveItem"`
-	ListItem  *MicrosoftGraphListItem  `json:"listItem"`
+	DriveItem *MicrosoftGraphDriveItem `json:"driveItem,omitempty"`
+	ListItem  *MicrosoftGraphListItem  `json:"listItem,omitempty"`
 }
 
 // MicrosoftGraphItemActionSet "@odata.type": "microsoft.graph.itemActionSet"
 type MicrosoftGraphItemActionSet struct {
-	Comment *MicrosoftGraphCommentAction `json:"comment"`
-	Create  *MicrosoftGraphCreateAction  `json:"create"`
-	Delete  *MicrosoftGraphDeleteAction  `json:"delete"`
-	Edit    *MicrosoftGraphEditAction    `json:"edit"`
-	Mention *MicrosoftGraphMentionAction `json:"mention"`
-	Move    *MicrosoftGraphMoveAction    `json:"move"`
-	Rename  *MicrosoftGraphRenameAction  `json:"rename"`
-	Restore *MicrosoftGraphRestoreAction `json:"restore"`
-	Share   *MicrosoftGraphShareAction   `json:"share"`
-	Version *MicrosoftGraphVersionAction `json:"version"`
+	Comment *MicrosoftGraphCommentAction `json:"comment,omitempty"`
+	Create  *MicrosoftGraphCreateAction  `json:"create,omitempty"`
+	Delete  *MicrosoftGraphDeleteAction  `json:"delete,omitempty"`
+	Edit    *MicrosoftGraphEditAction    `json:"edit,omitempty"`
+	Mention *MicrosoftGraphMentionAction `json:"mention,omitempty"`
+	Move    *MicrosoftGraphMoveAction    `json:"move,omitempty"`
+	Rename  *MicrosoftGraphRenameAction  `json:"rename,omitempty"`
+	Restore *MicrosoftGraphRestoreAction `json:"restore,omitempty"`
+	Share   *MicrosoftGraphShareAction   `json:"share,omitempty"`
+	Version *MicrosoftGraphVersionAction `json:"version,omitempty"`
 }
 
 // MicrosoftGraphCommentAction "@odata.type": "microsoft.graph.commentAction"
 type MicrosoftGraphCommentAction struct {
 	IsReply      bool                        `json:"isReply"`
-	ParentAuthor *MicrosoftGraphIdentitySet  `json:"parentAuthor"`
-	Participants []MicrosoftGraphIdentitySet `json:"participants"`
+	ParentAuthor *MicrosoftGraphIdentitySet  `json:"parentAuthor,omitempty"`
+	Participants []MicrosoftGraphIdentitySet `json:"participants,omitempty"`
 }
 
 // MicrosoftGraphCreateAction "@odata.type": "microsoft.graph.createAction"
@@ -394,7 +394,7 @@ type MicrosoftGraphEditAction struct {
 
 // MicrosoftGraphMentionAction "@odata.type": "microsoft.graph.mentionAction"
 type MicrosoftGraphMentionAction struct {
-	Mentionees []MicrosoftGraphIdentitySet `json:"mentionees"`
+	Mentionees []MicrosoftGraphIdentitySet `json:"mentionees,omitempty"`
 }
 
 // MicrosoftGraphMoveAction "@odata.type": "microsoft.graph.moveAction"
@@ -421,7 +421,7 @@ type MicrosoftGraphRestoreAction struct {
 
 // MicrosoftGraphShareAction "@odata.type": "microsoft.graph.shareAction"
 type MicrosoftGraphShareAction struct {
-	Recipients []MicrosoftGraphIdentitySet `json:"recipients"`
+	Recipients []MicrosoftGraphIdentitySet `json:"recipients,omitempty"`
 }
 
 // MicrosoftGraphVersionAction "@odata.type": "microsoft.graph.versionAction"
@@ -431,25 +431,25 @@ type MicrosoftGraphVersionAction struct {
 
 // MicrosoftGraphListItem "@odata.type": "microsoft.graph.listItem"
 type MicrosoftGraphListItem struct {
-	ContentType   *MicrosoftGraphContentTypeInfo `json:"contentType"`
-	Fields        *MicrosoftGraphFieldValueSet   `json:"fields"`
-	SharepointIDs *MicrosoftGraphSharepointIDs   `json:"sharepointIds"`
+	ContentType   *MicrosoftGraphContentTypeInfo `json:"contentType,omitempty"`
+	Fields        *MicrosoftGraphFieldValueSet   `json:"fields,omitempty"`
+	SharepointIDs *MicrosoftGraphSharepointIDs   `json:"sharepointIds,omitempty"`
 
 	/* relationships */
-	Activities []MicrosoftGraphItemActivity    `json:"activities"`
-	DriveItem  *MicrosoftGraphDriveItem        `json:"driveItem"`
-	Versions   []MicrosoftGraphListItemVersion `json:"versions"`
+	Activities []MicrosoftGraphItemActivity    `json:"activities,omitempty"`
+	DriveItem  *MicrosoftGraphDriveItem        `json:"driveItem,omitempty"`
+	Versions   []MicrosoftGraphListItemVersion `json:"versions,omitempty"`
 
 	/* inherited from baseItem */
 	ID                   string                       `json:"id"`
-	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy"`
-	CreatedDateTime      *time.Time                   `json:"createdDateTime"`
+	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy,omitempty"`
+	CreatedDateTime      *time.Time                   `json:"createdDateTime,omitempty"`
 	Description          string                       `json:"description"`
 	ETag                 string                       `json:"eTag"`
-	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy"`
-	LastModifiedDateTime *time.Time                   `json:"lastModifiedDateTime"`
+	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy,omitempty"`
+	LastModifiedDateTime *time.Time                   `json:"lastModifiedDateTime,omitempty"`
 	Name                 string                       `json:"name"`
-	ParentReference      *MicrosoftGraphItemReference `json:"parentReference"`
+	ParentReference      *MicrosoftGraphItemReference `json:"parentReference,omitempty"`
 	WebURL               string                       `json:"webUrl"`
 }
 
@@ -470,27 +470,27 @@ type MicrosoftGraphFieldValueSet struct {
 
 // MicrosoftGraphListItemVersion "@odata.type": "microsoft.graph.listItemVersion"
 type MicrosoftGraphListItemVersion struct {
-	Fields               *MicrosoftGraphFieldValueSet    `json:"fields"`
+	Fields               *MicrosoftGraphFieldValueSet    `json:"fields,omitempty"`
 	ID                   string                          `json:"id"`
-	LastModifiedBy       *MicrosoftGraphIdentitySet      `json:"lastModifiedBy"`
-	LastModifiedDateTime *time.Time                      `json:"lastModifiedDateTime"`
-	Published            *MicrosoftGraphPublicationFacet `json:"published"`
+	LastModifiedBy       *MicrosoftGraphIdentitySet      `json:"lastModifiedBy,omitempty"`
+	LastModifiedDateTime *time.Time                      `json:"lastModifiedDateTime,omitempty"`
+	Published            *MicrosoftGraphPublicationFacet `json:"published,omitempty"`
 }
 
 // MicrosoftGraphitemActivityTimeSet "@odata.type": "microsoft.graph.itemActivityTimeSet"
 type MicrosoftGraphitemActivityTimeSet struct {
-	ObservedDateTime *time.Time `json:"observedDateTime"`
-	RecordedDateTime *time.Time `json:"recordedDateTime"`
+	ObservedDateTime *time.Time `json:"observedDateTime,omitempty"`
+	RecordedDateTime *time.Time `json:"recordedDateTime,omitempty"`
 }
 
 // MicrosoftGraphPermission "@odata.type": "microsoft.graph.permission"
 type MicrosoftGraphPermission struct {
 	ID                  string                           `json:"id"`
-	GrantedTo           *MicrosoftGraphIdentitySet       `json:"grantedTo"`
-	GrantedToIdentities []MicrosoftGraphIdentitySet      `json:"grantedToIdentities"`
-	InheritedFrom       *MicrosoftGraphItemReference     `json:"inheritedFrom"`
-	Invitation          *MicrosoftGraphSharingInvitation `json:"invitation"`
-	Link                *MicrosoftGraphSharingLink       `json:"link"`
+	GrantedTo           *MicrosoftGraphIdentitySet       `json:"grantedTo,omitempty"`
+	GrantedToIdentities []MicrosoftGraphIdentitySet      `json:"grantedToIdentities,omitempty"`
+	InheritedFrom       *MicrosoftGraphItemReference     `json:"inheritedFrom,omitempty"`
+	Invitation          *MicrosoftGraphSharingInvitation `json:"invitation,omitempty"`
+	Link                *MicrosoftGraphSharingLink       `json:"link,omitempty"`
 	Roles               []string                         `json:"roles"` // read, write, sp.owner, sp.member
 	ShareID             string                           `json:"shareId"`
 }
@@ -498,13 +498,13 @@ type MicrosoftGraphPermission struct {
 // MicrosoftGraphSharingInvitation "@odata.type": "microsoft.graph.sharingInvitation"
 type MicrosoftGraphSharingInvitation struct {
 	Email          string                     `json:"email"`
-	InvitedBy      *MicrosoftGraphIdentitySet `json:"invitedBy"`
+	InvitedBy      *MicrosoftGraphIdentitySet `json:"invitedBy,omitempty"`
 	SignInRequired bool                       `json:"signInRequired"`
 }
 
 // MicrosoftGraphSharingLink "@odata.type": "microsoft.graph.sharingLink"
 type MicrosoftGraphSharingLink struct {
-	Application *MicrosoftGraphIdentity `json:"application"`
+	Application *MicrosoftGraphIdentity `json:"application,omitempty"`
 	Type        string                  `json:"type"`  // view, edit, embed
 	Scope       string                  `json:"scope"` // anonymous, organization
 	WebHTML     string                  `json:"webHtml"`
@@ -514,15 +514,15 @@ type MicrosoftGraphSharingLink struct {
 // MicrosoftGraphThumbnailSet "@odata.type": "microsoft.graph.thumbnailSet"
 type MicrosoftGraphThumbnailSet struct {
 	ID     string                   `json:"id"` // identifier
-	Large  *MicrosoftGraphThumbnail `json:"large"`
-	Medium *MicrosoftGraphThumbnail `json:"medium"`
-	Small  *MicrosoftGraphThumbnail `json:"small"`
-	Source *MicrosoftGraphThumbnail `json:"source"`
+	Large  *MicrosoftGraphThumbnail `json:"large,omitempty"`
+	Medium *MicrosoftGraphThumbnail `json:"medium,omitempty"`
+	Small  *MicrosoftGraphThumbnail `json:"small,omitempty"`
+	Source *MicrosoftGraphThumbnail `json:"source,omitempty"`
 }
 
 // MicrosoftGraphThumbnail "@odata.type": "microsoft.graph.thumbnail"
 type MicrosoftGraphThumbnail struct {
-	Content      *EdmDotStream `json:"content"`
+	Content      *EdmDotStream `json:"content,omitempty"`
 	Height       int32         `json:"height"`
 	SourceItemID string        `json:"sourceItemId"`
 	URL          string        `json:"url"`
@@ -531,39 +531,39 @@ type MicrosoftGraphThumbnail struct {
 
 // MicrosoftGraphDriveItemVersion "@odata.type": "microsoft.graph.driveItemVersion"
 type MicrosoftGraphDriveItemVersion struct {
-	Content              *EdmDotStream                   `json:"content"`
+	Content              *EdmDotStream                   `json:"content,omitempty"`
 	ID                   string                          `json:"id"`
-	LastModifiedBy       *MicrosoftGraphIdentitySet      `json:"lastModifiedBy"`
-	LastModifiedDateTime *time.Time                      `json:"lastModifiedDateTime"`
-	Publication          *MicrosoftGraphPublicationFacet `json:"publication"`
+	LastModifiedBy       *MicrosoftGraphIdentitySet      `json:"lastModifiedBy,omitempty"`
+	LastModifiedDateTime *time.Time                      `json:"lastModifiedDateTime,omitempty"`
+	Publication          *MicrosoftGraphPublicationFacet `json:"publication,omitempty"`
 	Height               int32                           `json:"height"`
 }
 
 // MicrosoftGraphDrive  "@odata.type": "microsoft.graph.drive"
 type MicrosoftGraphDrive struct {
-	Activities           []MicrosoftGraphItemActivity `json:"activities"`
+	Activities           []MicrosoftGraphItemActivity `json:"activities,omitempty"`
 	ID                   string                       `json:"id"` // identifier
-	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy"`
-	CreatedDateTime      *time.Time                   `json:"createdDateTime"`
+	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy,omitempty"`
+	CreatedDateTime      *time.Time                   `json:"createdDateTime,omitempty"`
 	Description          string                       `json:"description"`
 	DriveType            string                       `json:"driveType"` // personal, business, documentLibrary
-	Items                []MicrosoftGraphDriveItem    `json:"items"`
-	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy"`
-	LastModifiedDateTime *time.Time                   `json:"lastModifiedDateTime"`
+	Items                []MicrosoftGraphDriveItem    `json:"items,omitempty"`
+	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy,omitempty"`
+	LastModifiedDateTime *time.Time                   `json:"lastModifiedDateTime,omitempty"`
 	Name                 string                       `json:"name"`
-	Owner                *MicrosoftGraphIdentitySet   `json:"owner"`
-	Quota                *MicrosoftGraphQuota         `json:"quota"`
-	Root                 *MicrosoftGraphDriveItem     `json:"root"`
-	SharepointIDs        *MicrosoftGraphSharepointIDs `json:"sharepointIds"`
-	Special              []MicrosoftGraphDriveItem    `json:"special"`
-	System               *MicrosoftGraphSystemFacet   `json:"system"`
+	Owner                *MicrosoftGraphIdentitySet   `json:"owner,omitempty"`
+	Quota                *MicrosoftGraphQuota         `json:"quota,omitempty"`
+	Root                 *MicrosoftGraphDriveItem     `json:"root,omitempty"`
+	SharepointIDs        *MicrosoftGraphSharepointIDs `json:"sharepointIds,omitempty"`
+	Special              []MicrosoftGraphDriveItem    `json:"special,omitempty"`
+	System               *MicrosoftGraphSystemFacet   `json:"system,omitempty"`
 	WebURL               string                       `json:"webUrl"`
 }
 
 // MicrosoftGraphQuota "@odata.type": "microsoft.graph.quota"
 type MicrosoftGraphQuota struct {
 	Deleted   int64  `json:"deleted"`
-	FileCount int64  `json:"fileCount"`
+	FileCount *int64 `json:"fileCount,omitempty"`
 	Remaining int64  `json:"remaining"`
 	State     string `json:"state"` // normal, nearing, critical, exceeded
 	Total     int64  `json:"total"`

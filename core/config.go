@@ -2,11 +2,15 @@ package core
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/AirWSW/onedrive/graphapi"
 )
+
+var mutex sync.Mutex
 
 func GetConfigFilenameFromArgs() string {
 	argNum := len(os.Args)
@@ -19,54 +23,93 @@ func GetConfigFilenameFromArgs() string {
 }
 
 func InitOneDriveCollectionFromConfigFile() error {
-	newODCollection, err := NewOneDriveCollectionFromConfigFile()
-	if err != nil {
-		return err
-	}
-	ODCollection = *newODCollection
-	return nil
+	return NewOneDriveCollectionFromConfigFile(&ODCollection)
 }
 
-func NewOneDriveCollectionFromConfigFile() (*OneDriveCollection, error) {
-	configFile := GetConfigFilenameFromArgs()
-	file, _ := os.Open(configFile)
-	defer file.Close()
-	decoder := json.NewDecoder(file)
+func NewOneDriveCollectionFromConfigFile(odc *OneDriveCollection) error {
+	return odc.LoadConfigFile()
+}
 
+func (odc *OneDriveCollection) LoadConfigFile() error {
+	configFile := GetConfigFilenameFromArgs()
 	log.Println("Loading OneDriveCollection config file from " + configFile)
-	odc := &OneDriveCollection{}
-	err := decoder.Decode(odc)
+	mutex.Lock()
+	defer mutex.Unlock()
+	bytes, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		return nil, err
+		if _, ok := err.(*os.PathError); ok {
+			SaveConfigTemplateFile()
+		}
+		return err
 	}
-	return odc, nil
+	return json.Unmarshal(bytes, odc)
 }
 
 func (odc *OneDriveCollection) SaveConfigFile() error {
-	configFile := GetConfigFilenameFromArgs()
-	file, _ := os.OpenFile(configFile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
-	defer file.Close()
-	encoder := json.NewEncoder(file)
-
 	var newODs []interface{} = nil
 	for _, oneDrive := range odc.OneDrives {
 		newODs = append(newODs, struct {
 			MicrosoftEndPoints     graphapi.MicrosoftEndPoints     `json:"microsoftEndPoints"`
 			AzureADAppRegistration graphapi.AzureADAppRegistration `json:"azureAdAppRegistration"`
 			AzureADAuthFlowContext graphapi.AzureADAuthFlowContext `json:"azureAdAuthFlowContext"`
+			OneDriveDescription    OneDriveDescription             `json:"oneDriveDescription"`
 		}{
 			oneDrive.MicrosoftEndPoints,
 			oneDrive.AzureADAppRegistration,
 			oneDrive.AzureADAuthFlowContext,
+			oneDrive.OneDriveDescription,
 		})
 	}
-
 	newODC := struct {
 		OneDrives []interface{} `json:"oneDrives"`
 	}{
 		newODs,
 	}
 
+	configFile := GetConfigFilenameFromArgs()
+	bytes, err := json.MarshalIndent(newODC, "", "  ")
+	if err != nil {
+		return err
+	}
+
 	log.Println("Saving OneDriveCollection config file to " + configFile)
-	return encoder.Encode(&newODC)
+	mutex.Lock()
+	defer mutex.Unlock()
+	return ioutil.WriteFile(configFile, bytes, 0644)
+}
+
+func SaveConfigTemplateFile() error {
+	var newODs []interface{} = nil
+	newODs = append(newODs, struct {
+		MicrosoftEndPoints     graphapi.MicrosoftEndPoints     `json:"microsoftEndPoints"`
+		AzureADAppRegistration graphapi.AzureADAppRegistration `json:"azureAdAppRegistration"`
+		AzureADAuthFlowContext graphapi.AzureADAuthFlowContext `json:"azureAdAuthFlowContext"`
+		OneDriveDescription    OneDriveDescription             `json:"oneDriveDescription"`
+	}{
+		graphapi.MicrosoftEndPoints{},
+		graphapi.AzureADAppRegistration{
+			RedirectURIs: []string{},
+		},
+		graphapi.AzureADAuthFlowContext{},
+		OneDriveDescription{},
+	})
+	newODC := struct {
+		OneDrives []interface{} `json:"oneDrives"`
+	}{
+		newODs,
+	}
+
+	configFile := GetConfigFilenameFromArgs()
+	bytes, err := json.MarshalIndent(newODC, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(configFile, bytes, 0644); err != nil {
+		return err
+	}
+
+	log.Println("Creating OneDriveCollection config file template " + configFile)
+	mutex.Lock()
+	defer mutex.Unlock()
+	return ioutil.WriteFile(configFile, bytes, 0644)
 }

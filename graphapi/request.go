@@ -169,12 +169,13 @@ func (api *MicrosoftGraphAPI) getMicrosoftGraphAPITokenRequest() error {
 	}
 	if newMicrosoftGraphAPIToken == nil {
 		log.Println(string(body))
-		return errors.New("GetMicrosoftGraphAPITokenRequestError")
+		return errors.New("getMicrosoftGraphAPITokenRequestError")
 	}
 	if err := api.MicrosoftGraphAPIToken.Set(newMicrosoftGraphAPIToken); err != nil {
 		return err
 	}
 
+	log.Println("api.getMicrosoftGraphAPITokenRequest " + postAzureADTokenEndPointURL)
 	// Bind api.MicrosoftGraphAPIToken.RefreshToken to api.AzureADAuthFlowContext.RefreshToken
 	return api.AzureADAuthFlowContext.SetRefreshToken(api.MicrosoftGraphAPIToken.RefreshToken)
 }
@@ -185,4 +186,45 @@ func (api *MicrosoftGraphAPI) GetMicrosoftGraphAPIToken() error {
 
 func (api *MicrosoftGraphAPI) RefreshMicrosoftGraphAPIToken() error {
 	return api.GetMicrosoftGraphAPIToken()
+}
+
+func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(str string) ([]byte, error) {
+	// New request
+	reqURL := api.MicrosoftEndPoints.UseMicrosoftGraphAPIEndPointURL(str)
+	strURL, err := url.Parse(str)
+	if err != nil {
+		return nil, err
+	}
+	if strURL.Scheme == "https" {
+		reqURL = str
+	}
+	req, err := http.NewRequest("GET", reqURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", api.MicrosoftGraphAPIToken.GetAuthorizationString())
+
+	// Get response
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if !(resp.StatusCode == 200 || resp.StatusCode == 206) {
+		log.Println("Bad api.useMicrosoftGraphAPIRequest " + reqURL)
+		return nil, errors.New("Bad request")
+	}
+	
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("api.useMicrosoftGraphAPIRequest " + reqURL)
+	return []byte(body), nil
+}
+
+func (api *MicrosoftGraphAPI) UseMicrosoftGraphAPI(str string) ([]byte, error) {
+	return api.useMicrosoftGraphAPIRequest(str)
 }

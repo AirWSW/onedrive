@@ -17,6 +17,7 @@ func AddDefalutHeaders(c *gin.Context) {
 	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
 	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
 	c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
+	c.Next()
 }
 
 func handleGetAuth(c *gin.Context) {

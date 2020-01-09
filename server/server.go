@@ -73,6 +73,9 @@ func handleGetMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
 
 func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 	path := c.Query("path")
+	if path == "" {
+		path = c.Param("path")
+	}
 	microsoftGraphDriveItemCache, err := ODCollection.UseDefaultOneDrive().GetMicrosoftGraphAPIMeDriveContentURL(path)
 	if err != nil {
 		log.Println(err)

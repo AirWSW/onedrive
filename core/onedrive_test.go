@@ -135,3 +135,12 @@ func TestURL2(t *testing.T) {
 	}
 	t.Logf(strO[3:length])
 }
+
+func TestURL3(t *testing.T) {
+	strO := "od://username:password@od"
+	myURL, err := url.Parse(strO)
+	if err != nil {
+		t.Logf("err")
+	}
+	t.Logf(myURL.String())
+}

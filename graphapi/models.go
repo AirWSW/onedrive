@@ -53,7 +53,7 @@ type MicrosoftGraphBaseItem struct {
 	ID                   string                       `json:"id"` // identifier
 	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy,omitempty"`
 	CreatedDateTime      *time.Time                   `json:"createdDateTime,omitempty"`
-	Description          string                       `json:"description"`
+	Description          *string                      `json:"description,omitempty"`
 	ETag                 string                       `json:"eTag"`
 	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy,omitempty"`
 	LastModifiedDateTime time.Time                    `json:"lastModifiedDateTime"`
@@ -68,7 +68,7 @@ type MicrosoftGraphDriveItem struct {
 	Content        *EdmDotStream                   `json:"content,omitempty"`
 	CTag           string                          `json:"cTag"` // etag
 	Deleted        *MicrosoftGraphDeleted          `json:"deleted,omitempty"`
-	Description    string                          `json:"description"`
+	Description    *string                         `json:"description,omitempty"`
 	File           *MicrosoftGraphFile             `json:"file,omitempty"`
 	FileSystemInfo *MicrosoftGraphFileSystemInfo   `json:"fileSystemInfo,omitempty"`
 	Folder         *MicrosoftGraphFolder           `json:"folder,omitempty"`
@@ -444,7 +444,7 @@ type MicrosoftGraphListItem struct {
 	ID                   string                       `json:"id"`
 	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy,omitempty"`
 	CreatedDateTime      *time.Time                   `json:"createdDateTime,omitempty"`
-	Description          string                       `json:"description"`
+	Description          *string                      `json:"description,omitempty"`
 	ETag                 string                       `json:"eTag"`
 	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy,omitempty"`
 	LastModifiedDateTime *time.Time                   `json:"lastModifiedDateTime,omitempty"`
@@ -545,7 +545,7 @@ type MicrosoftGraphDrive struct {
 	ID                   string                       `json:"id"` // identifier
 	CreatedBy            *MicrosoftGraphIdentitySet   `json:"createdBy,omitempty"`
 	CreatedDateTime      *time.Time                   `json:"createdDateTime,omitempty"`
-	Description          string                       `json:"description"`
+	Description          *string                      `json:"description,omitempty"`
 	DriveType            string                       `json:"driveType"` // personal, business, documentLibrary
 	Items                []MicrosoftGraphDriveItem    `json:"items,omitempty"`
 	LastModifiedBy       *MicrosoftGraphIdentitySet   `json:"lastModifiedBy,omitempty"`

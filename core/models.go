@@ -23,10 +23,27 @@ type OneDrive struct {
 
 // OneDriveDescription describes the OneDrive local client
 type OneDriveDescription struct {
-	RootPath         string                        `json:"rootPath"`
-	VolumeMounts     []*VolumeMount                `json:"volumeMounts,omitempty"`
-	CacheConfig      *DriveCacheConfig             `json:"driveCacheConfig,omitempty"`
-	DriveDescription *graphapi.MicrosoftGraphDrive `json:"driveDescription,omitempty"`
+	RootPath          string                        `json:"rootPath"`
+	RefreshInterval   int64                         `json:"refreshInterval"`
+	DriveVolumeMounts []DriveVolumeMount            `json:"driveVolumeMounts,omitempty"`
+	CacheConfig       *DriveCacheConfig             `json:"driveCacheConfig,omitempty"`
+	DriveDescription  *graphapi.MicrosoftGraphDrive `json:"driveDescription,omitempty"`
+}
+
+// DriveVolumeMount configures the volume mounts.
+type DriveVolumeMount struct {
+	Type     *string `json:"type"`
+	Source   *string `json:"source"`
+	Target   *string `json:"target"`
+	Password *string `json:"password"`
+}
+
+// DriveCacheConfig configures the drive files cache.
+type DriveCacheConfig struct {
+	CacheEabled           bool      `json:"cacheEabled"`
+	CacheList             *[]string `json:"cacheList"`
+	FileRefreshInterval   int       `json:"fileRefreshInterval"`
+	FolderRefreshInterval int       `json:"folderRefreshInterval"`
 }
 
 // MicrosoftGraphDriveItemCache describes the MicrosoftGraphDriveItem cache structure
@@ -34,7 +51,7 @@ type MicrosoftGraphDriveItemCache struct {
 	CacheDescription *CacheDescription `json:"cacheDescription,omitempty"`
 
 	CTag        string                         `json:"cTag"` // etag
-	Description string                         `json:"description"`
+	Description *string                        `json:"description,omitempty"`
 	File        *graphapi.MicrosoftGraphFile   `json:"file,omitempty"`
 	Folder      *graphapi.MicrosoftGraphFolder `json:"folder,omitempty"`
 	Size        int64                          `json:"size"`
@@ -63,25 +80,20 @@ type CacheDescription struct {
 }
 
 type DriveItemCachePayload struct {
-	LastUpdateAt    time.Time                       `json:"createdAt"`
-	CTag            string                          `json:"cTag"` // etag
-	Description     string                          `json:"description"`
+	LastUpdateAt    time.Time                       `json:"lastUpdateAt"`
+	Description     *string                         `json:"description,omitempty"`
 	File            *graphapi.MicrosoftGraphFile    `json:"file,omitempty"`
 	Folder          *graphapi.MicrosoftGraphFolder  `json:"folder,omitempty"`
 	Size            int64                           `json:"size"`
-	Children        []DriveItemCachePayload         `json:"children"`
-	ID              string                          `json:"id"` // identifier
+	Children        []DriveItemCachePayload         `json:"children,omitempty"`
 	CreatedAt       time.Time                       `json:"createdAt"`
-	ETag            string                          `json:"eTag"`
 	LastModifiedAt  time.Time                       `json:"lastModifiedAt"`
 	Name            string                          `json:"name"`
-	ParentReference *DriveItemCachePayloadReference `json:"parentReference"`
-	DownloadURL     *string                         `json:"downloadUrl"`
+	ParentReference *DriveItemCachePayloadReference `json:"parentReference,omitempty"`
+	DownloadURL     *string                         `json:"downloadUrl,omitempty"`
 }
 
 type DriveItemCachePayloadReference struct {
-	DriveID   string `json:"driveId"`
 	DriveType string `json:"driveType"` // personal, business, documentLibrary
-	ID        string `json:"id"`
 	Path      string `json:"path"`
 }

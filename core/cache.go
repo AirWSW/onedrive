@@ -102,19 +102,22 @@ func (od *OneDrive) DriveItemToCache(microsoftGraphDriveItem *graphapi.Microsoft
 func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *MicrosoftGraphDriveItemCache) (*DriveItemCachePayload, error) {
 	innerDriveItemCachePayload := []DriveItemCachePayload{}
 	newDriveItemCachePayload := DriveItemCachePayload{}
+	innerDownloadURL := od.OneDriveDescription.DriveRootPathToRelativePath(microsoftGraphDriveItemCache.ParentReference.Path)
 	for _, children := range microsoftGraphDriveItemCache.Children {
+		innerDownloadURL += "/" + children.Name
+		innerDownloadURLPointer := &innerDownloadURL
+		if children.Folder != nil {
+			innerDownloadURLPointer = nil
+		}
 		newDriveItemCachePayload = DriveItemCachePayload{
-			CTag:           children.CTag,
 			Description:    children.Description,
 			File:           children.File,
 			Folder:         children.Folder,
 			Size:           children.Size,
-			ID:             children.ID,
 			CreatedAt:      time.Unix(children.CreatedAt, 0),
-			ETag:           children.ETag,
 			LastModifiedAt: time.Unix(children.LastModifiedAt, 0),
 			Name:           children.Name,
-			DownloadURL:    nil,
+			DownloadURL:    innerDownloadURLPointer,
 		}
 		innerDriveItemCachePayload = append(innerDriveItemCachePayload, newDriveItemCachePayload)
 	}
@@ -135,27 +138,28 @@ func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *Micros
 		relativePath = od.OneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
 	}
 	driveItemCachePayloadReference = &DriveItemCachePayloadReference{
-		DriveID:   parentReference.DriveID,
 		DriveType: parentReference.DriveType,
-		ID:        parentReference.ID,
 		Path:      relativePath,
 	}
 
+	downloadURL := od.OneDriveDescription.DriveRootPathToRelativePath(microsoftGraphDriveItemCache.ParentReference.Path)
+	downloadURL += "/" + microsoftGraphDriveItemCache.Name
+	downloadURLPointer := &downloadURL
+	if microsoftGraphDriveItemCache.Folder != nil {
+		downloadURLPointer = nil
+	}
 	driveItemCachePayload := DriveItemCachePayload{
 		LastUpdateAt:    time.Unix(microsoftGraphDriveItemCache.CacheDescription.LastUpdateAt, 0),
-		CTag:            microsoftGraphDriveItemCache.CTag,
 		Description:     microsoftGraphDriveItemCache.Description,
 		File:            microsoftGraphDriveItemCache.File,
 		Folder:          microsoftGraphDriveItemCache.Folder,
 		Size:            microsoftGraphDriveItemCache.Size,
 		Children:        innerDriveItemCachePayload,
-		ID:              microsoftGraphDriveItemCache.ID,
 		CreatedAt:       time.Unix(microsoftGraphDriveItemCache.CreatedAt, 0),
-		ETag:            microsoftGraphDriveItemCache.ETag,
 		LastModifiedAt:  time.Unix(microsoftGraphDriveItemCache.LastModifiedAt, 0),
 		Name:            microsoftGraphDriveItemCache.Name,
 		ParentReference: driveItemCachePayloadReference,
-		DownloadURL:     nil,
+		DownloadURL:     downloadURLPointer,
 	}
 	return &driveItemCachePayload, nil
 }
@@ -181,39 +185,38 @@ func (od *OneDrive) GetMicrosoftGraphDriveItemFromCache(str string) (*MicrosoftG
 							log.Println("HIT Cache "+cacheDescription.RequestURL, cacheDescription.LastUpdateAt)
 							return &children, nil
 						}
-						for _, innerMicrosoftGraphDriveItemCache := range od.MicrosoftGraphDriveItemCache {
-							innerCacheDescription := innerMicrosoftGraphDriveItemCache.CacheDescription
-							if innerCacheDescription.Path == str {
-								log.Println("HIT Cache "+innerCacheDescription.RequestURL, innerCacheDescription.LastUpdateAt)
-								return &innerMicrosoftGraphDriveItemCache, nil
+						if children.Folder != nil {
+							if children.Folder.ChildCount == 0 {
+								children.CacheDescription = cacheDescription
+								log.Println("HIT Cache "+cacheDescription.RequestURL, cacheDescription.LastUpdateAt)
+								return &children, nil
+							} else {
+								for _, innerMicrosoftGraphDriveItemCache := range od.MicrosoftGraphDriveItemCache {
+									innerCacheDescription := innerMicrosoftGraphDriveItemCache.CacheDescription
+									if innerCacheDescription.Path == str {
+										log.Println("HIT Cache "+innerCacheDescription.RequestURL, innerCacheDescription.LastUpdateAt)
+										return &innerMicrosoftGraphDriveItemCache, nil
+									}
+								}
+								log.Println("HIT Miss " + str)
+								parentReference := microsoftGraphDriveItemCache.ParentReference
+								newChildren := children
+								newChildren.ParentReference = &graphapi.MicrosoftGraphItemReference{
+									DriveID:   parentReference.DriveID,
+									DriveType: parentReference.DriveType,
+									ID:        microsoftGraphDriveItemCache.ID,
+									Path:      str,
+								}
+								newChildren.CacheDescription = &CacheDescription{
+									RequestURL:   str,
+									Path:         str,
+									LastUpdateAt: 0,
+									Status:       "Wait",
+								}
+								od.MicrosoftGraphDriveItemCache = append(od.MicrosoftGraphDriveItemCache, newChildren)
+								return &newChildren, nil
 							}
 						}
-						log.Println("HIT Miss " + str)
-						od.MicrosoftGraphDriveItemCache = append(od.MicrosoftGraphDriveItemCache, MicrosoftGraphDriveItemCache{
-							CacheDescription: &CacheDescription{
-								RequestURL:   str,
-								Path:         str,
-								LastUpdateAt: 0,
-								Status:       "Wait",
-							},
-						})
-						parentReference := microsoftGraphDriveItemCache.ParentReference
-						newPath := parentReference.Path + "/" + microsoftGraphDriveItemCache.Name
-						newChildren := children
-						newChildren.ParentReference = &graphapi.MicrosoftGraphItemReference{
-							DriveID:   parentReference.DriveID,
-							DriveType: parentReference.DriveType,
-							ID:        microsoftGraphDriveItemCache.ID,
-							Path:      newPath,
-						}
-						cacheDescription := microsoftGraphDriveItemCache.CacheDescription
-						newChildren.CacheDescription = &CacheDescription{
-							RequestURL:   newPath,
-							Path:         newPath,
-							LastUpdateAt: cacheDescription.LastUpdateAt,
-							Status:       "Wait",
-						}
-						return &newChildren, nil
 					}
 				}
 				return nil, errors.New("NoMicrosoftGraphDriveItemCacheRecord")
@@ -236,12 +239,126 @@ func (od *OneDrive) HitMicrosoftGraphDriveItemCache(path string) (*MicrosoftGrap
 }
 
 func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayload, error) {
-	microsoftGraphDriveItemCache, err := od.HitMicrosoftGraphDriveItemCache(path)
+	newPath := RegularPath(path)
+	newPathLength := len(newPath)
+	for _, driveVolumeMount := range od.OneDriveDescription.DriveVolumeMounts {
+		target := RegularPath(*driveVolumeMount.Target)
+		targetLength := len(target)
+		if newPathLength >= targetLength && newPath[0:targetLength] == target {
+			newPath = RegularPath(*driveVolumeMount.Source) + newPath[targetLength:newPathLength]
+		}
+	}
+	microsoftGraphDriveItemCache, err := od.HitMicrosoftGraphDriveItemCache(newPath)
 	go od.CronCacheMicrosoftGraphDrive()
 	if err != nil {
 		return nil, err
 	}
-	return od.DriveItemCacheToPayLoad(microsoftGraphDriveItemCache)
+	driveItemCachePayload, err := od.DriveItemCacheToPayLoad(microsoftGraphDriveItemCache)
+	if err != nil {
+		return nil, err
+	}
+
+	parentPath, filename := RegularPathToPathFilename(path)
+	driveItemCachePayload.ParentReference.Path = RegularPath(parentPath)
+	driveItemCachePayload.Name = filename
+	innerDriveItemCachePayload := []DriveItemCachePayload{}
+	newDriveItemCachePayload := DriveItemCachePayload{}
+	innerDownloadURL := od.OneDriveDescription.DriveRootPathToRelativePath(microsoftGraphDriveItemCache.ParentReference.Path)
+	for _, children := range driveItemCachePayload.Children {
+		innerDownloadURL += "/" + children.Name
+		innerDownloadURLPointer := &innerDownloadURL
+		if children.Folder != nil {
+			innerDownloadURLPointer = nil
+		}
+		newDriveItemCachePayload = DriveItemCachePayload{
+			Description:    children.Description,
+			File:           children.File,
+			Folder:         children.Folder,
+			Size:           children.Size,
+			CreatedAt:      children.CreatedAt,
+			LastModifiedAt: children.LastModifiedAt,
+			Name:           children.Name,
+			DownloadURL:    innerDownloadURLPointer,
+		}
+		innerDriveItemCachePayload = append(innerDriveItemCachePayload, newDriveItemCachePayload)
+	}
+
+	return driveItemCachePayload, nil
+}
+
+func (od *OneDrive) DriveContentURLCacheToPayLoad(microsoftGraphDriveItemCache *MicrosoftGraphDriveItemCache) (*DriveItemCachePayload, error) {
+	driveItemCachePayloadReference := &DriveItemCachePayloadReference{}
+	parentReference := microsoftGraphDriveItemCache.ParentReference
+	relativePath := od.OneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
+	driveItemCachePayloadReference = &DriveItemCachePayloadReference{
+		DriveType: parentReference.DriveType,
+		Path:      relativePath,
+	}
+
+	driveItemCachePayload := DriveItemCachePayload{
+		LastUpdateAt:    time.Unix(microsoftGraphDriveItemCache.CacheDescription.LastUpdateAt, 0),
+		Description:     microsoftGraphDriveItemCache.Description,
+		File:            microsoftGraphDriveItemCache.File,
+		Folder:          microsoftGraphDriveItemCache.Folder,
+		Size:            microsoftGraphDriveItemCache.Size,
+		CreatedAt:       time.Unix(microsoftGraphDriveItemCache.CreatedAt, 0),
+		LastModifiedAt:  time.Unix(microsoftGraphDriveItemCache.LastModifiedAt, 0),
+		Name:            microsoftGraphDriveItemCache.Name,
+		ParentReference: driveItemCachePayloadReference,
+		DownloadURL:     &microsoftGraphDriveItemCache.AtMicrosoftGraphDownloadURL,
+	}
+	return &driveItemCachePayload, nil
+}
+
+func (od *OneDrive) GetMicrosoftGraphDriveContentURLFromCache(str string) (*MicrosoftGraphDriveItemCache, error) {
+	path, filename := RegularPathToPathFilename(str)
+	str = od.OneDriveDescription.RelativePathToDriveRootPath(str)
+	path = od.OneDriveDescription.RelativePathToDriveRootPath(path)
+	log.Println("Hitting cache for " + path)
+	for _, microsoftGraphDriveItemCache := range od.MicrosoftGraphDriveItemCache {
+		cacheDescription := microsoftGraphDriveItemCache.CacheDescription
+		if cacheDescription.Path == path {
+			if time.Now().Unix()-cacheDescription.LastUpdateAt > 3600 {
+				return nil, errors.New("MicrosoftGraphDriveItemCacheExpired")
+			}
+			if filename == "" {
+				return &microsoftGraphDriveItemCache, nil
+			} else {
+				for _, children := range microsoftGraphDriveItemCache.Children {
+					if children.Name == filename {
+						if children.File != nil {
+							children.CacheDescription = cacheDescription
+							log.Println("HIT Cache "+cacheDescription.RequestURL, cacheDescription.LastUpdateAt)
+							return &children, nil
+						}
+					}
+				}
+				return nil, errors.New("NoMicrosoftGraphDriveItemCacheRecord")
+			}
+		}
+	}
+	od.MicrosoftGraphDriveItemCache = append(od.MicrosoftGraphDriveItemCache, MicrosoftGraphDriveItemCache{
+		CacheDescription: &CacheDescription{
+			RequestURL:   path,
+			Path:         path,
+			LastUpdateAt: 0,
+			Status:       "Wait",
+		},
+	})
+	return nil, errors.New("NoMicrosoftGraphDriveItemCacheRecord")
+}
+
+func (od *OneDrive) HitMicrosoftGraphDriveContentURLCache(path string) (*MicrosoftGraphDriveItemCache, error) {
+	return od.GetMicrosoftGraphDriveContentURLFromCache(path)
+}
+
+func (od *OneDrive) GetMicrosoftGraphAPIMeDriveContentURL(path string) (*DriveItemCachePayload, error) {
+	microsoftGraphDriveItemCache, err := od.HitMicrosoftGraphDriveContentURLCache(path)
+	go od.CronCacheMicrosoftGraphDrive()
+	if err != nil {
+		return nil, err
+	}
+	return od.DriveContentURLCacheToPayLoad(microsoftGraphDriveItemCache)
 }
 
 func (od *OneDrive) UpdateMicrosoftGraphDriveItemCache(cacheDescription *CacheDescription) (*MicrosoftGraphDriveItemCache, error) {

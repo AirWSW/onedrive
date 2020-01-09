@@ -10,7 +10,6 @@ import (
 	"github.com/AirWSW/onedrive/core"
 )
 
-var OD core.OldOneDrive
 var ODCollection *core.OneDriveCollection = &core.ODCollection
 
 func AddDefalutHeaders(c *gin.Context) {
@@ -22,13 +21,14 @@ func AddDefalutHeaders(c *gin.Context) {
 
 func handleGetAuth(c *gin.Context) {
 	code := c.Query("code")
+	od := ODCollection.UseDefaultOneDrive()
 	if len(code) > 0 {
-		OD.DriveDescriptionConfig.Code = code
-		if err := OD.GetMicrosoftGraphAPIToken(); err != nil {
+		od.AzureADAuthFlowContext.Code = &code
+		if err := od.MicrosoftGraphAPI.GetMicrosoftGraphAPIToken(); err != nil {
 			log.Println(err)
 		}
-		OD.DriveDescriptionConfig.Code = ""
-		if err := OD.SaveConfigFile(); err != nil {
+		od.AzureADAuthFlowContext.Code = nil
+		if err := ODCollection.SaveConfigFile(); err != nil {
 			log.Println(err)
 		}
 	}
@@ -41,33 +41,39 @@ func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 	}
-	bytes, err := json.Marshal(microsoftGraphDriveItemCache)
-	if err != nil {
-		log.Println(err)
+	if microsoftGraphDriveItemCache != nil {
+		bytes, err := json.Marshal(microsoftGraphDriveItemCache)
+		if err != nil {
+			log.Println(err)
+		}
+		c.String(http.StatusOK, "%s", bytes)
 	}
-	AddDefalutHeaders(c)
-	c.String(http.StatusOK, "%s", bytes)
+	c.AbortWithStatus(http.StatusNotFound)
 }
 
-func handleGetRaw(c *gin.Context) {
+func handleGetMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
 	path := c.Query("path")
 	log.Println(path)
-	bytes, err := ODCollection.OneDrives[0].GetMicrosoftGraphAPIMeDriveRaw(path)
+	bytes, err := ODCollection.UseDefaultOneDrive().GetMicrosoftGraphAPIMeDriveRaw(path)
 	if err != nil {
 		log.Println(err)
 	}
-	AddDefalutHeaders(c)
 	c.String(http.StatusOK, "%s", bytes)
 }
 
 func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 	path := c.Query("path")
-	url, err := OD.GetDriveItemContentURLFromPath(path)
+	microsoftGraphDriveItemCache, err := ODCollection.UseDefaultOneDrive().GetMicrosoftGraphAPIMeDriveContentURL(path)
 	if err != nil {
 		log.Println(err)
 	}
-	AddDefalutHeaders(c)
-	c.Redirect(http.StatusFound, url.String())
+	if microsoftGraphDriveItemCache != nil {
+		if microsoftGraphDriveItemCache.DownloadURL != nil {
+			AddDefalutHeaders(c)
+			c.Redirect(http.StatusFound, *microsoftGraphDriveItemCache.DownloadURL)
+		}
+	}
+	c.AbortWithStatus(http.StatusNotFound)
 }
 
 func main() {
@@ -77,19 +83,12 @@ func main() {
 	if err := ODCollection.StartAll(); err != nil {
 		log.Panicln(err)
 	}
-	// if err := core.ODCollection.Run(); err != nil {
-	// 	log.Panicln(err)
-	// }
-	// OD, _ = core.CreateOneDriveFromConfigFile()
-	// if err := OD.Run(); err != nil {
-	// 	log.Panicln(err)
-	// }
 	gin.SetMode(gin.DebugMode)
 	router := gin.Default()
 	router.GET("/onedrive/auth", handleGetAuth)
 	router.GET("/onedrive/drive", handleGetMicrosoftGraphDriveItem)
 	router.GET("/onedrive/file", handleGetMicrosoftGraphDriveItemContentURL)
-	router.GET("/onedrive/raw", handleGetRaw)
+	// router.GET("/onedrive/raw", handleGetMicrosoftGraphAPIMeDriveRaw)
 	router.GET("/onedrive/stream/*path", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/api/onedrive/auth", handleGetAuth)
 	router.GET("/api/onedrive/drive", handleGetMicrosoftGraphDriveItem)

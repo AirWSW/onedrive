@@ -1,1 +1,4 @@
-{ "go.testFlags": ["-v"], "go.inferGopath": false }
+{
+  "go.testFlags": ["-v"],
+  "go.inferGopath": false
+}

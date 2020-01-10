@@ -1,6 +1,6 @@
-# OneDrive api client
+# OneDrive API client
 
-OneDrive api client using Microsoft Graph API
+OneDrive API client using Microsoft Graph API
 
 ### Registering your app for Microsoft Graph
 

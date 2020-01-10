@@ -23,6 +23,7 @@ type OneDrive struct {
 
 // OneDriveDescription describes the OneDrive local client
 type OneDriveDescription struct {
+	OneDriveName      string                        `json:"oneDriveName"`
 	RootPath          string                        `json:"rootPath"`
 	RefreshInterval   int64                         `json:"refreshInterval"`
 	DriveVolumeMounts []DriveVolumeMount            `json:"driveVolumeMounts,omitempty"`
@@ -80,20 +81,20 @@ type CacheDescription struct {
 }
 
 type DriveItemCachePayload struct {
-	LastUpdateAt    time.Time                       `json:"lastUpdateAt"`
-	Description     *string                         `json:"description,omitempty"`
-	File            *graphapi.MicrosoftGraphFile    `json:"file,omitempty"`
-	Folder          *graphapi.MicrosoftGraphFolder  `json:"folder,omitempty"`
-	Size            int64                           `json:"size"`
-	Children        []DriveItemCachePayload         `json:"children,omitempty"`
-	CreatedAt       time.Time                       `json:"createdAt"`
-	LastModifiedAt  time.Time                       `json:"lastModifiedAt"`
-	Name            string                          `json:"name"`
-	ParentReference *DriveItemCachePayloadReference `json:"parentReference,omitempty"`
-	DownloadURL     *string                         `json:"downloadUrl,omitempty"`
+	Description    *string                         `json:"description,omitempty"`
+	File           *graphapi.MicrosoftGraphFile    `json:"file,omitempty"`
+	Folder         *graphapi.MicrosoftGraphFolder  `json:"folder,omitempty"`
+	Size           int64                           `json:"size"`
+	Children       []DriveItemCachePayload         `json:"children,omitempty"`
+	CreatedAt      time.Time                       `json:"createdAt"`
+	LastModifiedAt time.Time                       `json:"lastModifiedAt"`
+	Name           string                          `json:"name"`
+	Reference      *DriveItemCachePayloadReference `json:"reference,omitempty"`
+	DownloadURL    *string                         `json:"downloadUrl,omitempty"`
 }
 
 type DriveItemCachePayloadReference struct {
-	DriveType string `json:"driveType"` // personal, business, documentLibrary
-	Path      string `json:"path"`
+	LastUpdateAt time.Time `json:"lastUpdateAt"`
+	DriveType    string    `json:"driveType"` // personal, business, documentLibrary
+	Path         string    `json:"path"`
 }

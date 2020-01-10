@@ -22,23 +22,39 @@ func AddDefalutHeaders(c *gin.Context) {
 
 func handleGetAuth(c *gin.Context) {
 	code := c.Query("code")
-	od := ODCollection.UseDefaultOneDrive()
-	if len(code) > 0 {
-		od.AzureADAuthFlowContext.Code = &code
-		if err := od.MicrosoftGraphAPI.GetMicrosoftGraphAPIToken(); err != nil {
-			log.Println(err)
+	state := c.Query("state")
+	if len(state) > 0 {
+		od := ODCollection.UseOneDriveByStateID(state)
+		if od == nil {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
 		}
-		od.AzureADAuthFlowContext.Code = nil
-		if err := ODCollection.SaveConfigFile(); err != nil {
-			log.Println(err)
+		if len(code) > 0 {
+			od.AzureADAuthFlowContext.Code = &code
+			if err := od.ReStart(ODCollection); err != nil {
+				log.Println(err)
+				c.AbortWithStatus(http.StatusBadRequest)
+				return
+			}
+			c.String(http.StatusOK, "code %s", code)
+			return
 		}
 	}
-	c.String(http.StatusOK, "code %s", code)
+	c.AbortWithStatus(http.StatusNotFound)
 }
 
 func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 	path := c.Query("path")
-	microsoftGraphDriveItemCache, err := ODCollection.UseDefaultOneDrive().GetMicrosoftGraphDriveItem(path)
+	drive := c.Query("drive")
+	od := ODCollection.UseDefaultOneDrive()
+	if len(drive) > 0 {
+		od = ODCollection.UseOneDriveByOneDriveName(drive)
+		if od == nil {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+	}
+	microsoftGraphDriveItemCache, err := od.GetMicrosoftGraphDriveItem(path)
 	if err != nil {
 		log.Println(err)
 	}
@@ -46,6 +62,8 @@ func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 		bytes, err := json.Marshal(microsoftGraphDriveItemCache)
 		if err != nil {
 			log.Println(err)
+			c.AbortWithStatus(http.StatusNotFound)
+			return
 		}
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
@@ -59,10 +77,20 @@ func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 
 func handleGetMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
 	path := c.Query("path")
-	log.Println(path)
-	bytes, err := ODCollection.UseDefaultOneDrive().GetMicrosoftGraphAPIMeDriveRaw(path)
+	drive := c.Query("drive")
+	od := ODCollection.UseDefaultOneDrive()
+	if len(drive) > 0 {
+		od = ODCollection.UseOneDriveByOneDriveName(drive)
+		if od == nil {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+	}
+	bytes, err := ODCollection.UseOneDriveByOneDriveName(drive).GetMicrosoftGraphAPIMeDriveRaw(path)
 	if err != nil {
 		log.Println(err)
+		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
@@ -76,9 +104,20 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 	if path == "" {
 		path = c.Param("path")
 	}
-	microsoftGraphDriveItemCache, err := ODCollection.UseDefaultOneDrive().GetMicrosoftGraphAPIMeDriveContentURL(path)
+	drive := c.Query("drive")
+	od := ODCollection.UseDefaultOneDrive()
+	if len(drive) > 0 {
+		od = ODCollection.UseOneDriveByOneDriveName(drive)
+		if od == nil {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+	}
+	microsoftGraphDriveItemCache, err := ODCollection.UseOneDriveByOneDriveName(drive).GetMicrosoftGraphAPIMeDriveContentURL(path)
 	if err != nil {
 		log.Println(err)
+		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
 	if microsoftGraphDriveItemCache != nil {
 		if microsoftGraphDriveItemCache.DownloadURL != nil {
@@ -105,7 +144,7 @@ func main() {
 	router.GET("/onedrive/auth", handleGetAuth)
 	router.GET("/onedrive/drive", handleGetMicrosoftGraphDriveItem)
 	router.GET("/onedrive/file", handleGetMicrosoftGraphDriveItemContentURL)
-	// router.GET("/onedrive/raw", handleGetMicrosoftGraphAPIMeDriveRaw)
+	router.GET("/onedrive/raw", handleGetMicrosoftGraphAPIMeDriveRaw)
 	router.GET("/onedrive/stream/*path", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/api/onedrive/auth", handleGetAuth)
 	router.GET("/api/onedrive/drive", handleGetMicrosoftGraphDriveItem)

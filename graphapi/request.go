@@ -93,6 +93,7 @@ func NewMicrosoftGraphAPI(input *NewMicrosoftGraphAPIInput) (*MicrosoftGraphAPI,
 	}
 	if err := api.AzureADAuthFlowContext.Set(&AzureADAuthFlowContext{
 		GrantScope:   azureADAuthFlowContext.GrantScope,
+		StateID:      azureADAuthFlowContext.StateID,
 		Code:         azureADAuthFlowContext.Code,
 		RefreshToken: azureADAuthFlowContext.RefreshToken,
 	}); err != nil {
@@ -120,9 +121,10 @@ func (api *MicrosoftGraphAPI) getMicrosoftGraphAPITokenRequestPostForm() (io.Rea
 		log.Println("Invalid Microsoft Graph API Token Grant Type, use the following URLs to GET code")
 		clientID := azureADAppRegistration.ClientID
 		grantScope := url.QueryEscape(azureADAuthFlowContext.GrantScope)
+		state := *azureADAuthFlowContext.StateID
 		getAzureADAuthorizeEndPointURL := api.MicrosoftEndPoints.GetAzureADAuthorizeEndPointURL()
 		for _, redirectURI := range azureADAppRegistration.RedirectURIs {
-			log.Println(getAzureADAuthorizeEndPointURL + "?client_id=" + clientID + "&scope=" + grantScope + "&response_type=code&redirect_uri=" + redirectURI)
+			log.Println(getAzureADAuthorizeEndPointURL + "?client_id=" + clientID + "&response_type=code" + "&redirect_uri=" + redirectURI + "&response_mode=query" + "&scope=" + grantScope + "&state=" + state)
 		}
 		return nil, errors.New("Invalid Microsoft Graph API Token Grant Type")
 	}
@@ -214,7 +216,7 @@ func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(str string) ([]byte, e
 		log.Println("Bad api.useMicrosoftGraphAPIRequest " + reqURL)
 		return nil, errors.New("Bad request")
 	}
-	
+
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

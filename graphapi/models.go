@@ -35,6 +35,7 @@ type AzureADAppRegistration struct {
 
 type AzureADAuthFlowContext struct {
 	GrantScope   string  `json:"grantScope"`
+	StateID      *string `json:"stateId,omitempty"`
 	Code         *string `json:"code,omitempty"`
 	RefreshToken *string `json:"refreshToken,omitempty"`
 }

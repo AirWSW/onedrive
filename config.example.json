@@ -1,17 +1,35 @@
 {
-    "registerConfig": {
-        "endPointURI": "https://login.chinacloudapi.cn/common/oauth2/v2.0/token",
-        "scope": "user.read files.readwrite.all offline_access",
-        "clientID": "",
-        "clientSecret": "",
-        "redirectURI": ""
-    },
-    "driveConfig": {
-        "endPointURI": "https://microsoftgraph.chinacloudapi.cn/v1.0/me/drive",
-        "rootPath": "root",
-        "fileRefreshInterval": 1200,
-        "folderRefreshInterval": 600,
-        "code": "",
-        "refreshToken": ""
-    }
+    "oneDrives": [
+        {
+            "microsoftEndPoints": {
+                "azureAdPortalEndPointUrl": "https://portal.azure.com",
+                "azureAdEndPointUrl": "https://login.microsoftonline.com",
+                "microsoftgraphApiEndPointUrl": "https://graph.microsoft.com"
+            },
+            "azureAdAppRegistration": {
+                "displayName": "",
+                "clientId": "",
+                "redirectUris": [],
+                "clientSecret": ""
+            },
+            "azureAdAuthFlowContext": {
+                "grantScope": "Files.ReadWrite.All User.Read profile openid email offline_access",
+                "code": null,
+                "refreshToken": null
+            },
+            "oneDriveDescription": {
+                "rootPath": "root",
+                "refreshInterval": 3600,
+                "driveVolumeMounts": [
+                    {
+                        "type": "file.only",
+                        "source": "source",
+                        "target": "target",
+                        "password": "password"
+                    }
+                ],
+                "driveDescription": {}
+            }
+        }
+    ]
 }

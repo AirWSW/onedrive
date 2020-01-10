@@ -1,5 +1,7 @@
 package graphapi
 
+import uuid "github.com/satori/go.uuid"
+
 func (e *MicrosoftEndPoints) Set(input *MicrosoftEndPoints) error {
 	e.AzureADPortalEndPointURL = input.AzureADPortalEndPointURL
 	e.AzureADEndPointURL = input.AzureADEndPointURL
@@ -36,6 +38,12 @@ func (r *AzureADAppRegistration) Set(input *AzureADAppRegistration) error {
 
 func (c *AzureADAuthFlowContext) Set(input *AzureADAuthFlowContext) error {
 	c.GrantScope = input.GrantScope
+	if input.StateID == nil {
+		stateID := uuid.Must(uuid.NewV4(), nil).String()
+		c.StateID = &stateID
+	} else {
+		c.StateID = input.StateID
+	}
 	c.Code = input.Code
 	c.RefreshToken = input.RefreshToken
 	return nil

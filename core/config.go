@@ -67,7 +67,7 @@ func (odc *OneDriveCollection) SaveConfigFile() error {
 	}
 
 	configFile := GetConfigFilenameFromArgs()
-	bytes, err := json.MarshalIndent(newODC, "", "  ")
+	bytes, err := json.MarshalIndent(newODC, "", "    ")
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,9 @@ func SaveConfigTemplateFile() error {
 			RedirectURIs: []string{},
 		},
 		graphapi.AzureADAuthFlowContext{},
-		OneDriveDescription{},
+		OneDriveDescription{
+			RefreshInterval: 3600,
+		},
 	})
 	newODC := struct {
 		OneDrives []interface{} `json:"oneDrives"`

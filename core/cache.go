@@ -14,17 +14,18 @@ func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *cache.
 	driveItemCachePayloadReference := &DriveItemCachePayloadReference{}
 	parentReference := &graphapi.MicrosoftGraphItemReference{}
 	relativePath := ""
-	if microsoftGraphDriveItemCache.Children != nil {
-		if microsoftGraphDriveItemCache.Children != nil || len(microsoftGraphDriveItemCache.Children) > 0 {
-			parentReference = microsoftGraphDriveItemCache.Children[0].ParentReference
-			relativePath = od.OneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
-		} else {
-			parentReference = microsoftGraphDriveItemCache.ParentReference
-			relativePath = od.OneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
-		}
-	} else {
+	if microsoftGraphDriveItemCache.Children != nil && len(microsoftGraphDriveItemCache.Children) > 0 {
+		parentReference = microsoftGraphDriveItemCache.Children[0].ParentReference
+		relativePath = od.OneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
+	} else if microsoftGraphDriveItemCache.File != nil {
 		parentReference = microsoftGraphDriveItemCache.ParentReference
 		relativePath = od.OneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
+	} else if microsoftGraphDriveItemCache.Folder != nil && microsoftGraphDriveItemCache.Children == nil {
+		parentReference = microsoftGraphDriveItemCache.ParentReference
+		relativePath = od.OneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
+	} else {
+		parentReference = microsoftGraphDriveItemCache.ParentReference
+		relativePath = od.OneDriveDescription.DriveRootPathToRelativePath(parentReference.Path + "/" + microsoftGraphDriveItemCache.Name)
 	}
 	driveItemCachePayloadReference = &DriveItemCachePayloadReference{
 		LastUpdateAt: time.Unix(microsoftGraphDriveItemCache.CacheDescription.LastUpdateAt, 0).UTC(),

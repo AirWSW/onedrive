@@ -29,6 +29,7 @@ func (od *OneDrive) CronCacheMicrosoftGraphDrive() error {
 			}
 		}
 	}
+	od.DriveCacheCollection.Save(od.OneDriveDescription.DriveDescription)
 	if ok {
 		return nil
 	} else {

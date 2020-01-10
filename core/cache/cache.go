@@ -86,6 +86,12 @@ func IsCacheNeedUpdate(odd oneDriveDescription, cacheDescription *CacheDescripti
 	if cacheDescription.Status == "Wait" {
 		return errors.New("MicrosoftGraphDriveItemCacheStatusWait " + cacheDescription.Path)
 	}
+	if cacheDescription.Status == "Caching" {
+		return nil
+	}
+	if cacheDescription.Status == "Failed" {
+		return nil
+	}
 	if time.Now().Unix()-cacheDescription.LastUpdateAt > graphapi.AtMicrosoftGraphDownloadURLAvailableSafePeriod-odd.GetRefreshInterval() {
 		return errors.New("MicrosoftGraphDriveItemCacheNeedUpdate " + cacheDescription.Path)
 	}
@@ -155,10 +161,11 @@ func (dcc *DriveCacheCollection) GetMicrosoftGraphDriveFromCache(odd oneDriveDes
 	path = odd.RelativePathToDriveRootPath(path)
 	subPath = odd.RelativePathToDriveRootPath(subPath)
 	log.Println("Hitting cache for", subPath)
-	for _, microsoftGraphDriveItemCache := range dcc.MicrosoftGraphDriveItemCache {
+	for i, microsoftGraphDriveItemCache := range dcc.MicrosoftGraphDriveItemCache {
 		cacheDescription := microsoftGraphDriveItemCache.CacheDescription
 		if cacheDescription.Path == subPath {
 			if err := IsCacheInvalid(odd, cacheDescription); err != nil {
+				dcc.MicrosoftGraphDriveItemCache[i].CacheDescription.Status = "Faild"
 				return nil, err
 			}
 			if filename == "" {
@@ -206,10 +213,10 @@ func (dcc *DriveCacheCollection) GetMicrosoftGraphDriveFromCacheStep3(odd oneDri
 		} else {
 			for _, innerMicrosoftGraphDriveItemCache := range dcc.MicrosoftGraphDriveItemCache {
 				innerCacheDescription := innerMicrosoftGraphDriveItemCache.CacheDescription
-				if err := IsCacheInvalid(odd, innerCacheDescription); err != nil {
-					return nil, err
-				}
 				if innerCacheDescription.Path == path {
+					if err := IsCacheInvalid(odd, innerCacheDescription); err != nil {
+						return nil, err
+					}
 					log.Println("Cache hitted for", innerCacheDescription.RequestURL, time.Unix(innerCacheDescription.LastUpdateAt, 0).UTC())
 					return &innerMicrosoftGraphDriveItemCache, nil
 				}

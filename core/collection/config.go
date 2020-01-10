@@ -1,4 +1,4 @@
-package core
+package collection
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/AirWSW/onedrive/core/description"
 	"github.com/AirWSW/onedrive/graphapi"
 )
 
@@ -52,7 +53,7 @@ func (odc *OneDriveCollection) SaveConfigFile() error {
 			MicrosoftEndPoints     graphapi.MicrosoftEndPoints     `json:"microsoftEndPoints"`
 			AzureADAppRegistration graphapi.AzureADAppRegistration `json:"azureAdAppRegistration"`
 			AzureADAuthFlowContext graphapi.AzureADAuthFlowContext `json:"azureAdAuthFlowContext"`
-			OneDriveDescription    OneDriveDescription             `json:"oneDriveDescription"`
+			OneDriveDescription    description.OneDriveDescription `json:"oneDriveDescription"`
 		}{
 			oneDrive.MicrosoftEndPoints,
 			oneDrive.AzureADAppRegistration,
@@ -86,14 +87,14 @@ func SaveConfigTemplateFile() error {
 		MicrosoftEndPoints     graphapi.MicrosoftEndPoints     `json:"microsoftEndPoints"`
 		AzureADAppRegistration graphapi.AzureADAppRegistration `json:"azureAdAppRegistration"`
 		AzureADAuthFlowContext graphapi.AzureADAuthFlowContext `json:"azureAdAuthFlowContext"`
-		OneDriveDescription    OneDriveDescription             `json:"oneDriveDescription"`
+		OneDriveDescription    description.OneDriveDescription `json:"oneDriveDescription"`
 	}{
 		graphapi.MicrosoftEndPoints{},
 		graphapi.AzureADAppRegistration{
 			RedirectURIs: []string{},
 		},
 		graphapi.AzureADAuthFlowContext{},
-		OneDriveDescription{
+		description.OneDriveDescription{
 			RefreshInterval: 3600,
 		},
 	})

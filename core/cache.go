@@ -6,10 +6,15 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 	"time"
 
+	"github.com/AirWSW/onedrive/core/description"
+	"github.com/AirWSW/onedrive/core/utils"
 	"github.com/AirWSW/onedrive/graphapi"
 )
+
+var mutex sync.Mutex
 
 func (od *OneDrive) LoadDriveCacheFile() error {
 	cacheFile := od.OneDriveDescription.DriveDescription.ID + ".cache.json"
@@ -163,7 +168,7 @@ func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *Micros
 }
 
 func (od *OneDrive) GetMicrosoftGraphDriveItemFromCache(str string) (*MicrosoftGraphDriveItemCache, error) {
-	path, filename := RegularPathToPathFilename(str)
+	path, filename := utils.RegularPathToPathFilename(str)
 	str = od.OneDriveDescription.RelativePathToDriveRootPath(str)
 	path = od.OneDriveDescription.RelativePathToDriveRootPath(path)
 	log.Println("Hitting cache for " + path)
@@ -237,15 +242,15 @@ func (od *OneDrive) HitMicrosoftGraphDriveItemCache(path string) (*MicrosoftGrap
 }
 
 func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayload, error) {
-	newPath := RegularPath(path)
+	newPath := utils.RegularPath(path)
 	newPathLength := len(newPath)
-	parentPath, filename := RegularPathToPathFilename(path)
-	driveVolumeMountRule := &DriveVolumeMount{}
+	parentPath, filename := utils.RegularPathToPathFilename(path)
+	driveVolumeMountRule := &description.DriveVolumeMount{}
 	for _, driveVolumeMount := range od.OneDriveDescription.DriveVolumeMounts {
-		target := RegularPath(*driveVolumeMount.Target)
+		target := utils.RegularPath(*driveVolumeMount.Target)
 		targetLength := len(target)
 		if newPathLength >= targetLength && newPath[0:targetLength] == target {
-			newPath = RegularPath(*driveVolumeMount.Source) + newPath[targetLength:newPathLength]
+			newPath = utils.RegularPath(*driveVolumeMount.Source) + newPath[targetLength:newPathLength]
 			driveVolumeMountRule = &driveVolumeMount
 			continue
 		}
@@ -261,13 +266,13 @@ func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayl
 		return nil, err
 	}
 
-	if newPath != RegularPath(path) {
+	if newPath != utils.RegularPath(path) {
 		if driveVolumeMountRule.Type != nil {
 			if *driveVolumeMountRule.Type == "file.only" && driveItemCachePayload.File == nil {
 				return nil, errors.New("file.only")
 			}
 		}
-		driveItemCachePayload.Reference.Path = RegularPath(parentPath)
+		driveItemCachePayload.Reference.Path = utils.RegularPath(parentPath)
 		driveItemCachePayload.Name = filename
 		innerDriveItemCachePayload := []DriveItemCachePayload{}
 		newDriveItemCachePayload := DriveItemCachePayload{}
@@ -320,7 +325,7 @@ func (od *OneDrive) DriveContentURLCacheToPayLoad(microsoftGraphDriveItemCache *
 }
 
 func (od *OneDrive) GetMicrosoftGraphDriveContentURLFromCache(str string) (*MicrosoftGraphDriveItemCache, error) {
-	path, filename := RegularPathToPathFilename(str)
+	path, filename := utils.RegularPathToPathFilename(str)
 	str = od.OneDriveDescription.RelativePathToDriveRootPath(str)
 	path = od.OneDriveDescription.RelativePathToDriveRootPath(path)
 	log.Println("Hitting cache for " + path)

@@ -7,57 +7,11 @@ import (
 	"github.com/AirWSW/onedrive/graphapi"
 )
 
-var ODCollection OneDriveCollection
-
-func (odc *OneDriveCollection) StartAll() error {
-	for _, oneDrive := range odc.OneDrives {
-		if err := oneDrive.Start(odc); err != nil {
-			return err
-		}
-	}
-	if err := odc.SaveConfigFile(); err != nil {
-		return err
-	}
-	if err := odc.CronStart(); err != nil {
-		return err
-	}
-	return nil
+type oneDriveCollection interface { // import cycle
+	SaveConfigFile() error
 }
 
-func (odc *OneDriveCollection) UseDefaultOneDrive() *OneDrive {
-	return odc.OneDrives[0]
-}
-
-func (odc *OneDriveCollection) UseOneDriveByID(str string) *OneDrive {
-	for _, oneDrive := range odc.OneDrives {
-		if oneDrive.OneDriveDescription.DriveDescription.ID == str {
-			return oneDrive
-		}
-	}
-	return nil
-}
-
-func (odc *OneDriveCollection) UseOneDriveByOneDriveName(str string) *OneDrive {
-	for _, oneDrive := range odc.OneDrives {
-		if oneDrive.OneDriveDescription.OneDriveName == str {
-			return oneDrive
-		}
-	}
-	return nil
-}
-
-func (odc *OneDriveCollection) UseOneDriveByStateID(str string) *OneDrive {
-	for _, oneDrive := range odc.OneDrives {
-		if oneDrive.AzureADAuthFlowContext.StateID != nil {
-			if *oneDrive.AzureADAuthFlowContext.StateID == str {
-				return oneDrive
-			}
-		}
-	}
-	return nil
-}
-
-func (od *OneDrive) Start(odc *OneDriveCollection) error {
+func (od *OneDrive) Start(odc oneDriveCollection) error { // import cycle
 	if err := od.InitMicrosoftGraphAPI(); err != nil {
 		return err
 	}
@@ -79,7 +33,7 @@ func (od *OneDrive) Start(odc *OneDriveCollection) error {
 	return nil
 }
 
-func (od *OneDrive) ReStart(odc *OneDriveCollection) error {
+func (od *OneDrive) ReStart(odc oneDriveCollection) error { // import cycle
 	if err := od.Start(odc); err != nil {
 		return err
 	}
@@ -104,7 +58,7 @@ func (od *OneDrive) InitMicrosoftGraphAPI() error {
 	return nil
 }
 
-func (od *OneDrive) InitMicrosoftGraphAPIToken(odc *OneDriveCollection) error {
+func (od *OneDrive) InitMicrosoftGraphAPIToken(odc oneDriveCollection) error { // import cycle
 	if od.AzureADAuthFlowContext.RefreshToken == nil {
 		if od.AzureADAuthFlowContext.Code == nil {
 			if err := od.MicrosoftGraphAPI.GetMicrosoftGraphAPIToken(); err != nil {

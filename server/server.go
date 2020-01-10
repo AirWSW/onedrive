@@ -7,10 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/AirWSW/onedrive/core"
+	"github.com/AirWSW/onedrive/core/collection"
 )
 
-var ODCollection *core.OneDriveCollection = &core.ODCollection
+var ODCollection *collection.OneDriveCollection = &collection.ODCollection
 
 func AddDefalutHeaders(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
@@ -109,7 +109,7 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 }
 
 func main() {
-	if err := core.InitOneDriveCollectionFromConfigFile(); err != nil {
+	if err := collection.InitOneDriveCollectionFromConfigFile(); err != nil {
 		log.Panicln(err)
 	}
 	if err := ODCollection.StartAll(); err != nil {

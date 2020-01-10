@@ -8,7 +8,8 @@ import (
 
 // OneDriveCollection collects all OneDrives
 type OneDriveCollection struct {
-	OneDrives []*OneDrive `json:"oneDrives"`
+	IsDebugMode *bool       `json:"isDebugMode"`
+	OneDrives   []*OneDrive `json:"oneDrives"`
 }
 
 // OneDrive describes a OneDrive

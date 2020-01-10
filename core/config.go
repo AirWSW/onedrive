@@ -61,8 +61,10 @@ func (odc *OneDriveCollection) SaveConfigFile() error {
 		})
 	}
 	newODC := struct {
-		OneDrives []interface{} `json:"oneDrives"`
+		IsDebugMode *bool         `json:"isDebugMode"`
+		OneDrives   []interface{} `json:"oneDrives"`
 	}{
+		odc.IsDebugMode,
 		newODs,
 	}
 

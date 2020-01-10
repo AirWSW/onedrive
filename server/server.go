@@ -75,30 +75,6 @@ func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 	c.AbortWithStatus(http.StatusNotFound)
 }
 
-func handleGetMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
-	path := c.Query("path")
-	drive := c.Query("drive")
-	od := ODCollection.UseDefaultOneDrive()
-	if len(drive) > 0 {
-		od = ODCollection.UseOneDriveByOneDriveName(drive)
-		if od == nil {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-	}
-	bytes, err := ODCollection.UseOneDriveByOneDriveName(drive).GetMicrosoftGraphAPIMeDriveRaw(path)
-	if err != nil {
-		log.Println(err)
-		c.AbortWithStatus(http.StatusNotFound)
-		return
-	}
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
-	c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
-	c.String(http.StatusOK, "%s", bytes)
-}
-
 func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {
@@ -139,12 +115,20 @@ func main() {
 	if err := ODCollection.StartAll(); err != nil {
 		log.Panicln(err)
 	}
-	gin.SetMode(gin.DebugMode)
+	if ODCollection.IsDebugMode != nil && *ODCollection.IsDebugMode {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	router := gin.Default()
+	if ODCollection.IsDebugMode != nil && *ODCollection.IsDebugMode {
+		router.GET("/onedrive/raw", handleGetMicrosoftGraphAPIMeDriveRaw)
+		router.POST("/onedrive/raw", handlePostMicrosoftGraphAPIMeDriveRaw)
+		router.PUT("/onedrive/raw", handlePutMicrosoftGraphAPIMeDriveRaw)
+	}
 	router.GET("/onedrive/auth", handleGetAuth)
 	router.GET("/onedrive/drive", handleGetMicrosoftGraphDriveItem)
 	router.GET("/onedrive/file", handleGetMicrosoftGraphDriveItemContentURL)
-	router.GET("/onedrive/raw", handleGetMicrosoftGraphAPIMeDriveRaw)
 	router.GET("/onedrive/stream/*path", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/api/onedrive/auth", handleGetAuth)
 	router.GET("/api/onedrive/drive", handleGetMicrosoftGraphDriveItem)

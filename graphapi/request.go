@@ -190,7 +190,53 @@ func (api *MicrosoftGraphAPI) RefreshMicrosoftGraphAPIToken() error {
 	return api.GetMicrosoftGraphAPIToken()
 }
 
-func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(str string) ([]byte, error) {
+func (api *MicrosoftGraphAPI) newMicrosoftGraphAPIRequest(method, reqURL string, postBody io.Reader) (*http.Request, error) {
+	// New request
+	req, err := http.NewRequest(method, reqURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", api.MicrosoftGraphAPIToken.GetAuthorizationString())
+	return req, nil
+}
+
+func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(method, reqURL string, postBody io.Reader) ([]byte, error) {
+	if !(method == "GET" || method == "POST" || method == "PUT") {
+		return nil, errors.New("NotSupportMicrosoftGraphAPIRequestMethod")
+	}
+	req, err := api.newMicrosoftGraphAPIRequest(method, reqURL, postBody)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode < http.StatusBadRequest {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		log.Println(method + " api.useMicrosoftGraphAPIRequest " + reqURL)
+		return []byte(body), nil
+	}
+	if resp.StatusCode < http.StatusInternalServerError {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		log.Println("BadRequest " + method + " api.useMicrosoftGraphAPIRequest " + reqURL)
+		return []byte(body), errors.New(http.StatusText(resp.StatusCode))
+	}
+	log.Println("InternalServerError " + method + " api.useMicrosoftGraphAPIRequest " + reqURL)
+	return nil, errors.New(http.StatusText(resp.StatusCode))
+}
+
+func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIGetRequest(str string) ([]byte, error) {
 	// New request
 	reqURL := api.MicrosoftEndPoints.UseMicrosoftGraphAPIEndPointURL(str)
 	strURL, err := url.Parse(str)
@@ -200,33 +246,26 @@ func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(str string) ([]byte, e
 	if strURL.Scheme == "https" {
 		reqURL = str
 	}
-	req, err := http.NewRequest("GET", reqURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", api.MicrosoftGraphAPIToken.GetAuthorizationString())
-
-	// Get response
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	if !(resp.StatusCode == 200 || resp.StatusCode == 206) {
-		log.Println("Bad api.useMicrosoftGraphAPIRequest " + reqURL)
-		return nil, errors.New("Bad request")
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Println("api.useMicrosoftGraphAPIRequest " + reqURL)
-	return []byte(body), nil
+	return api.useMicrosoftGraphAPIRequest("GET", reqURL, nil)
 }
 
-func (api *MicrosoftGraphAPI) UseMicrosoftGraphAPI(str string) ([]byte, error) {
-	return api.useMicrosoftGraphAPIRequest(str)
+func (api *MicrosoftGraphAPI) UseMicrosoftGraphAPIGet(str string) ([]byte, error) {
+	return api.useMicrosoftGraphAPIGetRequest(str)
+}
+
+func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIPostRequest(str string, postBody io.Reader) ([]byte, error) {
+	// New request
+	reqURL := api.MicrosoftEndPoints.UseMicrosoftGraphAPIEndPointURL(str)
+	strURL, err := url.Parse(str)
+	if err != nil {
+		return nil, err
+	}
+	if strURL.Scheme == "https" {
+		reqURL = str
+	}
+	return api.useMicrosoftGraphAPIRequest("POST", reqURL, postBody)
+}
+
+func (api *MicrosoftGraphAPI) UseMicrosoftGraphAPIPost(str string, postBody io.Reader) ([]byte, error) {
+	return api.useMicrosoftGraphAPIPostRequest(str, postBody)
 }

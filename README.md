@@ -2,6 +2,26 @@
 
 OneDrive API client using Microsoft Graph API
 
+### Feature
+
+1. OneDrive API client wrapper as OneIndex, PyIndex etc.
+2. Cache while first request income and auto refreshing.
+3. In memory cache with permanent local cache file (Experiment).
+4. Multi OneDrives within one endpoint, specify one drive by using query (Experiment).
+5. Run without other requirements, just configure once and run it.
+
+#### Danger testing
+
+1. Volume mounts and mount type setting.
+
+#### Known BUGs
+
+### TODO list
+
+1. File upload and ongoing download support.
+2. Buildin web graph user interface support.
+3. Administration controls support.
+
 ### Registering your app for Microsoft Graph
 
 To connect with Microsoft Graph, you'll need a work/school account or a Microsoft account.

@@ -581,3 +581,21 @@ type MicrosoftGraphSystemFacet struct {
 	 * facet may be populated with additional properties.
 	 */
 }
+
+// MicrosoftGraphUploadSession "@odata.type": "microsoft.graph.uploadSession"
+type MicrosoftGraphUploadSession struct {
+	ExpirationDateTime time.Time `json:"expirationDateTime"`
+	NextExpectedRanges []string  `json:"nextExpectedRanges"`
+	UploadURL          string    `json:"uploadUrl"`
+}
+
+// MicrosoftGraphDriveItemUploadableProperties  "@odata.type": "microsoft.graph.driveItemUploadableProperties"
+type MicrosoftGraphDriveItemUploadableProperties struct {
+	Description    *string                       `json:"description,omitempty"`
+	FileSize       *int64                        `json:"fileSize"`
+	FileSystemInfo *MicrosoftGraphFileSystemInfo `json:"fileSystemInfo,omitempty"`
+	Name           string                        `json:"name"`
+
+	AtMicrosoftGraphConflictBehavior *string `json:"@microsoft.graph.conflictBehavior"` // rename, fail, replace
+	AtMicrosoftGraphSourceURL        *string `json:"@microsoft.graph.sourceUrl"`
+}

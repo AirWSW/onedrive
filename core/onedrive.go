@@ -132,7 +132,7 @@ func (od *OneDrive) InitMicrosoftGraphAPIToken(odc *OneDriveCollection) error {
 }
 
 func (od *OneDrive) InitOneDriveDescription() error {
-	bytes, err := od.MicrosoftGraphAPI.UseMicrosoftGraphAPI("/me/drive")
+	bytes, err := od.MicrosoftGraphAPI.UseMicrosoftGraphAPIGet("/me/drive")
 	if err != nil {
 		log.Println(err)
 	}

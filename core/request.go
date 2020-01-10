@@ -2,19 +2,23 @@ package core
 
 import (
 	"encoding/json"
+	"io"
 	"net/url"
 
 	"github.com/AirWSW/onedrive/graphapi"
 )
 
 func (od *OneDrive) GetMicrosoftGraphAPIMeDriveRaw(str string) ([]byte, error) {
-	odd := od.OneDriveDescription
-	return od.MicrosoftGraphAPI.UseMicrosoftGraphAPI(odd.UseMicrosoftGraphAPIMeDrivePath(str))
+	return od.MicrosoftGraphAPI.UseMicrosoftGraphAPIGet(str)
+}
+
+func (od *OneDrive) PostMicrosoftGraphAPIMeDriveRaw(str string, postBody io.Reader) ([]byte, error) {
+	return od.MicrosoftGraphAPI.UseMicrosoftGraphAPIPost(str, postBody)
 }
 
 func (od *OneDrive) GetMicrosoftGraphAPIMeDrive() error {
 	odd := od.OneDriveDescription
-	bytes, err := od.MicrosoftGraphAPI.UseMicrosoftGraphAPI(odd.UseMicrosoftGraphAPIMeDrivePath(""))
+	bytes, err := od.MicrosoftGraphAPI.UseMicrosoftGraphAPIGet(odd.UseMicrosoftGraphAPIMeDrivePath(""))
 	if err != nil {
 		return err
 	}
@@ -35,7 +39,7 @@ func (od *OneDrive) GetMicrosoftGraphAPIMeDriveItem(str string) (*graphapi.Micro
 	if strURL.Scheme == "https" {
 		reqURL = str
 	}
-	bytes, err := od.MicrosoftGraphAPI.UseMicrosoftGraphAPI(reqURL)
+	bytes, err := od.MicrosoftGraphAPI.UseMicrosoftGraphAPIGet(reqURL)
 	if err != nil {
 		return nil, err
 	}
@@ -55,12 +59,12 @@ func (od *OneDrive) GetMicrosoftGraphAPIMeDriveChildren(str string) (*graphapi.M
 		return nil, err
 	}
 	if url.Scheme != "https" {
-		bytes, err = od.MicrosoftGraphAPI.UseMicrosoftGraphAPI(odd.UseMicrosoftGraphAPIMeDriveChildren(str))
+		bytes, err = od.MicrosoftGraphAPI.UseMicrosoftGraphAPIGet(odd.UseMicrosoftGraphAPIMeDriveChildren(str))
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		bytes, err = od.MicrosoftGraphAPI.UseMicrosoftGraphAPI(str)
+		bytes, err = od.MicrosoftGraphAPI.UseMicrosoftGraphAPIGet(str)
 	}
 	if err != nil {
 		return nil, err
@@ -74,7 +78,7 @@ func (od *OneDrive) GetMicrosoftGraphAPIMeDriveChildren(str string) (*graphapi.M
 
 func (od *OneDrive) GetMicrosoftGraphAPIMeDriveExpandChildren(str string) error {
 	odd := od.OneDriveDescription
-	bytes, err := od.MicrosoftGraphAPI.UseMicrosoftGraphAPI(odd.UseMicrosoftGraphAPIMeDriveExpandChildrenPath(str))
+	bytes, err := od.MicrosoftGraphAPI.UseMicrosoftGraphAPIGet(odd.UseMicrosoftGraphAPIMeDriveExpandChildrenPath(str))
 	if err != nil {
 		return err
 	}
@@ -87,7 +91,7 @@ func (od *OneDrive) GetMicrosoftGraphAPIMeDriveExpandChildren(str string) error 
 
 func (od *OneDrive) GetMicrosoftGraphAPIMeDriveContent(str string) ([]byte, error) {
 	odd := od.OneDriveDescription
-	return od.MicrosoftGraphAPI.UseMicrosoftGraphAPI(odd.UseMicrosoftGraphAPIMeDriveContentPath(str))
+	return od.MicrosoftGraphAPI.UseMicrosoftGraphAPIGet(odd.UseMicrosoftGraphAPIMeDriveContentPath(str))
 }
 
 func (od *OneDrive) GetMicrosoftGraphAPIMeDriveChildrenRequest(str string) (*MicrosoftGraphDriveItemCache, error) {

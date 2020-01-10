@@ -21,7 +21,7 @@ func handleGetMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
 			return
 		}
 	}
-	bytes, err := od.GetMicrosoftGraphAPIMeDriveRaw(path)
+	bytes, err := od.MicrosoftGraphAPI.GetMicrosoftGraphAPIMeDriveRaw(path)
 	if err != nil {
 		log.Println(err)
 		// c.AbortWithStatus(http.StatusNotFound)
@@ -54,7 +54,7 @@ func handlePostMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
 		}
 		postBody = bytes.NewReader(data)
 	}
-	bytes, err := od.PostMicrosoftGraphAPIMeDriveRaw(path, postBody)
+	bytes, err := od.MicrosoftGraphAPI.PostMicrosoftGraphAPIMeDriveRaw(path, postBody)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusNotFound)
@@ -76,7 +76,7 @@ func handlePutMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
 			return
 		}
 	}
-	bytes, err := od.GetMicrosoftGraphAPIMeDriveRaw(path)
+	bytes, err := od.MicrosoftGraphAPI.GetMicrosoftGraphAPIMeDriveRaw(path)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusNotFound)

@@ -1,4 +1,4 @@
-package core
+package cache_test
 
 import (
 	"testing"

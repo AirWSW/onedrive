@@ -1,12 +1,31 @@
 package description
 
 import (
+	"encoding/json"
+	"log"
 	"net/url"
 	"strings"
 
 	"github.com/AirWSW/onedrive/core/utils"
 	"github.com/AirWSW/onedrive/graphapi"
 )
+
+type MicrosoftGraphAPI interface {
+	UseMicrosoftGraphAPIGet(string) ([]byte, error)
+}
+
+func (odd *OneDriveDescription) Init(api MicrosoftGraphAPI) error {
+	bytes, err := api.UseMicrosoftGraphAPIGet("/me/drive")
+	if err != nil {
+		log.Println(err)
+	}
+	microsoftGraphDrive := graphapi.MicrosoftGraphDrive{}
+	if err := json.Unmarshal(bytes, &microsoftGraphDrive); err != nil {
+		log.Println(err)
+	}
+	odd.SetDriveDescription(&microsoftGraphDrive)
+	return nil
+}
 
 func (odd *OneDriveDescription) SetDriveDescription(input *graphapi.MicrosoftGraphDrive) error {
 	odd.DriveDescription = input
@@ -78,4 +97,14 @@ func (odd *OneDriveDescription) UseMicrosoftGraphAPIMeDriveExpandChildrenPath(st
 
 func (odd *OneDriveDescription) UseMicrosoftGraphAPIMeDriveContentPath(str string) string {
 	return odd.RelativePathToFullDriveRootPath(str) + ":/content"
+}
+
+func (odd *OneDriveDescription) GetRefreshInterval() int64 {
+	refreshInterval := int64(3000)
+	if odd.RefreshInterval < 60 {
+		refreshInterval = int64(60)
+	} else if odd.RefreshInterval < 3000 {
+		refreshInterval = odd.RefreshInterval
+	}
+	return refreshInterval
 }

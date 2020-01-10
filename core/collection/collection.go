@@ -13,7 +13,7 @@ func (odc *OneDriveCollection) StartAll() error {
 	if err := odc.SaveConfigFile(); err != nil {
 		return err
 	}
-	if err := odc.CronStart(); err != nil {
+	if err := odc.CronStartAll(); err != nil {
 		return err
 	}
 	return nil

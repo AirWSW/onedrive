@@ -4,6 +4,11 @@ import (
 	"time"
 )
 
+const (
+	AtMicrosoftGraphDownloadURLAvailableSafePeriod = int64(3300)
+	AtMicrosoftGraphDownloadURLAvailablePeriod     = int64(3600)
+)
+
 type NewMicrosoftGraphAPIInput struct {
 	MicrosoftEndPoints     *MicrosoftEndPoints     `json:"microsoftEndPoints,omitempty"`
 	AzureADAppRegistration *AzureADAppRegistration `json:"azureAdAppRegistration,omitempty"`
@@ -111,6 +116,18 @@ type MicrosoftGraphDriveItem struct {
 	AtMicrosoftGraphConflictBehavior string `json:"@microsoft.graph.conflictBehavior"`
 	AtMicrosoftGraphDownloadURL      string `json:"@microsoft.graph.downloadUrl"`
 	AtMicrosoftGraphSourceURL        string `json:"@microsoft.graph.sourceUrl"`
+	/* NOTE AtMicrosoftGraphConflictBehavior
+	 * The parameter @microsoft.graph.conflictBehavior should be included in the URL
+	 * instead of the body of the request.
+	 *
+	 * NOTE for AtMicrosoftGraphDownloadURL:
+	 * The @microsoft.graph.downloadUrl value is a short-lived URL and can't be cached.
+	 * The URL will only be available for a short period of time (1 hour) before it is
+	 * invalidated. Removing file permissions for a user may not immediately invalidate
+	 * the URL.
+	 *
+	 * https://docs.microsoft.com/en-us/graph/api/resources/driveitem?view=graph-rest-1.0#instance-attributes
+	 */
 }
 
 // MicrosoftGraphDriveItemCollection "@odata.type": "microsoft.graph.driveItemCollection"

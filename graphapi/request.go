@@ -158,28 +158,34 @@ func (api *MicrosoftGraphAPI) getMicrosoftGraphAPITokenRequest() error {
 	if err != nil {
 		return err
 	}
+
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
+	if resp.StatusCode < http.StatusBadRequest {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		// json.Unmarshal the post response
+		newMicrosoftGraphAPIToken := &MicrosoftGraphAPIToken{}
+		if err = json.Unmarshal(body, newMicrosoftGraphAPIToken); err != nil {
+			return err
+		}
+		if newMicrosoftGraphAPIToken == nil {
+			return errors.New("api.getMicrosoftGraphAPITokenRequest GET " + postAzureADTokenEndPointURL)
+		}
+		if err := api.MicrosoftGraphAPIToken.Set(newMicrosoftGraphAPIToken); err != nil {
+			return err
+		}
+		log.Println("api.getMicrosoftGraphAPITokenRequest GET " + postAzureADTokenEndPointURL)
+		// Bind api.MicrosoftGraphAPIToken.RefreshToken to api.AzureADAuthFlowContext.RefreshToken
+		return api.AzureADAuthFlowContext.SetRefreshToken(api.MicrosoftGraphAPIToken.RefreshToken)
 	}
-
-	// json.Unmarshal the post response
-	newMicrosoftGraphAPIToken := &MicrosoftGraphAPIToken{}
-	if err = json.Unmarshal(body, newMicrosoftGraphAPIToken); err != nil {
-		return err
+	if resp.StatusCode < http.StatusInternalServerError {
+		log.Println("api.getMicrosoftGraphAPITokenRequest GET BadRequest " + postAzureADTokenEndPointURL)
+		return errors.New(http.StatusText(resp.StatusCode))
 	}
-	if newMicrosoftGraphAPIToken == nil {
-		log.Println(string(body))
-		return errors.New("getMicrosoftGraphAPITokenRequestError")
-	}
-	if err := api.MicrosoftGraphAPIToken.Set(newMicrosoftGraphAPIToken); err != nil {
-		return err
-	}
-
-	log.Println("api.getMicrosoftGraphAPITokenRequest " + postAzureADTokenEndPointURL)
-	// Bind api.MicrosoftGraphAPIToken.RefreshToken to api.AzureADAuthFlowContext.RefreshToken
-	return api.AzureADAuthFlowContext.SetRefreshToken(api.MicrosoftGraphAPIToken.RefreshToken)
+	log.Println("api.getMicrosoftGraphAPITokenRequest GET InternalServerError " + postAzureADTokenEndPointURL)
+	return errors.New(http.StatusText(resp.StatusCode))
 }
 
 func (api *MicrosoftGraphAPI) GetMicrosoftGraphAPIToken() error {
@@ -221,7 +227,7 @@ func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(method, reqURL string,
 		if err != nil {
 			return nil, err
 		}
-		log.Println(method + " api.useMicrosoftGraphAPIRequest " + reqURL)
+		log.Println("api.useMicrosoftGraphAPIRequest " + method + " " + reqURL)
 		return []byte(body), nil
 	}
 	if resp.StatusCode < http.StatusInternalServerError {
@@ -229,10 +235,10 @@ func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(method, reqURL string,
 		if err != nil {
 			return nil, err
 		}
-		log.Println("BadRequest " + method + " api.useMicrosoftGraphAPIRequest " + reqURL)
+		log.Println("api.useMicrosoftGraphAPIRequest " + method + " BadRequest " + reqURL)
 		return []byte(body), errors.New(http.StatusText(resp.StatusCode))
 	}
-	log.Println("InternalServerError " + method + " api.useMicrosoftGraphAPIRequest " + reqURL)
+	log.Println("api.useMicrosoftGraphAPIRequest " + method + " InternalServerError " + reqURL)
 	return nil, errors.New(http.StatusText(resp.StatusCode))
 }
 

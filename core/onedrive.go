@@ -1,9 +1,7 @@
 package core
 
 import (
-	"encoding/json"
-	"log"
-
+	"github.com/AirWSW/onedrive/core/api"
 	"github.com/AirWSW/onedrive/graphapi"
 )
 
@@ -21,13 +19,13 @@ func (od *OneDrive) Start(odc oneDriveCollection) error { // import cycle
 		}
 		return nil
 	}
-	if err := od.InitOneDriveDescription(); err != nil {
+	if err := od.OneDriveDescription.Init(&od.MicrosoftGraphAPI); err != nil {
 		return err
 	}
-	if err := od.LoadDriveCacheFile(); err != nil {
+	if err := od.DriveCacheCollection.Load(od.OneDriveDescription.DriveDescription); err != nil {
 		return err
 	}
-	if err := od.SaveDriveCacheFile(); err != nil {
+	if err := od.DriveCacheCollection.Save(od.OneDriveDescription.DriveDescription); err != nil {
 		return err
 	}
 	return nil
@@ -49,11 +47,11 @@ func (od *OneDrive) InitMicrosoftGraphAPI() error {
 		AzureADAppRegistration: &od.AzureADAppRegistration,
 		AzureADAuthFlowContext: &od.AzureADAuthFlowContext,
 	}
-	newMicrosoftGraphAPI, err := graphapi.NewMicrosoftGraphAPI(input)
+	newMicrosoftGraphAPI, err := api.NewMicrosoftGraphAPI(input)
 	if err != nil {
 		return err
 	}
-	od.MicrosoftGraphAPI = newMicrosoftGraphAPI
+	od.MicrosoftGraphAPI = *newMicrosoftGraphAPI
 	// od.AzureADAuthFlowContext.Code = nil
 	return nil
 }
@@ -82,18 +80,5 @@ func (od *OneDrive) InitMicrosoftGraphAPIToken(odc oneDriveCollection) error { /
 			return err
 		}
 	}
-	return nil
-}
-
-func (od *OneDrive) InitOneDriveDescription() error {
-	bytes, err := od.MicrosoftGraphAPI.UseMicrosoftGraphAPIGet("/me/drive")
-	if err != nil {
-		log.Println(err)
-	}
-	microsoftGraphDrive := graphapi.MicrosoftGraphDrive{}
-	if err := json.Unmarshal(bytes, &microsoftGraphDrive); err != nil {
-		log.Println(err)
-	}
-	od.OneDriveDescription.SetDriveDescription(&microsoftGraphDrive)
 	return nil
 }

@@ -99,8 +99,8 @@ func (u *Uploader) Start(api MicrosoftGraphAPI) {
 				log.Println(err)
 			}
 			for _, innerUploadSession := range uploadSessions {
-				payload = strings.NewReader(randSeq(innerUploadSession.UploadSessionDescription.GetContentChunkSizeInt64()))
-				microsoftGraphUploadSession, err = innerUploadSession.Put(*uploadURL, payload)
+				innerPayload := strings.NewReader(randSeq(innerUploadSession.UploadSessionDescription.GetContentChunkSizeInt64()))
+				microsoftGraphUploadSession, err = innerUploadSession.Put(*uploadURL, innerPayload)
 				if err != nil {
 					log.Println(err)
 				}

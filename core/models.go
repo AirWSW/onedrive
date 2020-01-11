@@ -18,7 +18,7 @@ type OneDrive struct {
 	OneDriveDescription    description.OneDriveDescription `json:"oneDriveDescription"`
 	MicrosoftGraphAPI      api.MicrosoftGraphAPI           `json:"microsoftGraphApi,omitempty"`
 	DriveCacheCollection   cache.DriveCacheCollection      `json:"driveCacheCollection,omitempty"`
-	UploadCollection       upload.UploadCollection         `json:"uploadCollection,omitempty"`
+	UploaderCollection     upload.UploaderCollection       `json:"uploaderCollection,omitempty"`
 }
 
 type DriveItemCachePayload struct {

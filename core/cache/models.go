@@ -3,7 +3,6 @@ package cache
 import "github.com/AirWSW/onedrive/graphapi"
 
 type DriveCacheCollection struct {
-	
 	MicrosoftGraphDriveItemCache []MicrosoftGraphDriveItemCache `json:"microsoftGraphDriveItemCache,omitempty"`
 }
 
@@ -30,7 +29,7 @@ type MicrosoftGraphDriveItemCache struct {
 	WebURL          string                                `json:"webUrl"`
 
 	/* instance annotations */
-	AtMicrosoftGraphDownloadURL string `json:"@microsoft.graph.downloadUrl"`
+	AtMicrosoftGraphDownloadURL *string `json:"@microsoft.graph.downloadUrl"`
 }
 
 type CacheDescription struct {

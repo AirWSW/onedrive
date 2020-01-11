@@ -196,7 +196,7 @@ func (api *MicrosoftGraphAPI) RefreshMicrosoftGraphAPIToken() error {
 	return api.GetMicrosoftGraphAPIToken()
 }
 
-func (api *MicrosoftGraphAPI) newMicrosoftGraphAPIRequest(method, reqURL string, postBody io.Reader) (*http.Request, error) {
+func (api *MicrosoftGraphAPI) newMicrosoftGraphAPIRequest(method, reqURL string, payload io.Reader) (*http.Request, error) {
 	// New request
 	req, err := http.NewRequest(method, reqURL, nil)
 	if err != nil {
@@ -206,11 +206,11 @@ func (api *MicrosoftGraphAPI) newMicrosoftGraphAPIRequest(method, reqURL string,
 	return req, nil
 }
 
-func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(method, reqURL string, postBody io.Reader) ([]byte, error) {
+func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(method, reqURL string, payload io.Reader) ([]byte, error) {
 	if !(method == "GET" || method == "POST" || method == "PUT") {
 		return nil, errors.New("NotSupportMicrosoftGraphAPIRequestMethod")
 	}
-	req, err := api.newMicrosoftGraphAPIRequest(method, reqURL, postBody)
+	req, err := api.newMicrosoftGraphAPIRequest(method, reqURL, payload)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +259,7 @@ func (api *MicrosoftGraphAPI) UseMicrosoftGraphAPIGet(str string) ([]byte, error
 	return api.useMicrosoftGraphAPIGetRequest(str)
 }
 
-func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIPostRequest(str string, postBody io.Reader) ([]byte, error) {
+func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIPostRequest(str string, payload io.Reader) ([]byte, error) {
 	// New request
 	reqURL := api.MicrosoftEndPoints.UseMicrosoftGraphAPIEndPointURL(str)
 	strURL, err := url.Parse(str)
@@ -269,9 +269,26 @@ func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIPostRequest(str string, postBo
 	if strURL.Scheme == "https" {
 		reqURL = str
 	}
-	return api.useMicrosoftGraphAPIRequest("POST", reqURL, postBody)
+	return api.useMicrosoftGraphAPIRequest("POST", reqURL, payload)
 }
 
-func (api *MicrosoftGraphAPI) UseMicrosoftGraphAPIPost(str string, postBody io.Reader) ([]byte, error) {
-	return api.useMicrosoftGraphAPIPostRequest(str, postBody)
+func (api *MicrosoftGraphAPI) UseMicrosoftGraphAPIPost(str string, payload io.Reader) ([]byte, error) {
+	return api.useMicrosoftGraphAPIPostRequest(str, payload)
+}
+
+func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIPutRequest(str string, payload io.Reader) ([]byte, error) {
+	// New request
+	reqURL := api.MicrosoftEndPoints.UseMicrosoftGraphAPIEndPointURL(str)
+	strURL, err := url.Parse(str)
+	if err != nil {
+		return nil, err
+	}
+	if strURL.Scheme == "https" {
+		reqURL = str
+	}
+	return api.useMicrosoftGraphAPIRequest("PUT", reqURL, payload)
+}
+
+func (api *MicrosoftGraphAPI) UseMicrosoftGraphAPIPut(str string, payload io.Reader) ([]byte, error) {
+	return api.useMicrosoftGraphAPIPutRequest(str, payload)
 }

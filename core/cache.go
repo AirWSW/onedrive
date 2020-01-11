@@ -152,7 +152,7 @@ func (od *OneDrive) DriveContentURLCacheToPayLoad(microsoftGraphDriveItemCache *
 		LastModifiedAt: time.Unix(microsoftGraphDriveItemCache.LastModifiedAt, 0).UTC(),
 		Name:           microsoftGraphDriveItemCache.Name,
 		Reference:      driveItemCachePayloadReference,
-		DownloadURL:    &microsoftGraphDriveItemCache.AtMicrosoftGraphDownloadURL,
+		DownloadURL:    microsoftGraphDriveItemCache.AtMicrosoftGraphDownloadURL,
 	}
 	return &driveItemCachePayload, nil
 }

@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func (uc *UploadCollection) LoadUploadCacheFile(driveID string) error {
+func (uc *UploaderCollection) Load(driveID string) error {
 	uploadCacheFile := driveID + ".upload.json"
 	log.Println("Loading OneDrive upload cache file from " + uploadCacheFile)
 	mutex.Lock()
@@ -23,11 +23,11 @@ func (uc *UploadCollection) LoadUploadCacheFile(driveID string) error {
 	return json.Unmarshal(bytes, uc)
 }
 
-func (uc *UploadCollection) SaveUploadCacheFile(driveID string) error {
+func (uc *UploaderCollection) Save(driveID string) error {
 	uploadCache := struct {
-		Uploads []*Upload `json:"uploads"`
+		Uploaders []*Uploader `json:"uploaders"`
 	}{
-		uc.Uploads,
+		uc.Uploaders,
 	}
 
 	uploadCacheFile := driveID + ".upload.json"

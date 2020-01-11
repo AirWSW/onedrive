@@ -4,22 +4,31 @@ import (
 	"github.com/AirWSW/onedrive/graphapi"
 )
 
-type UploadCollection struct {
-	Uploads []*Upload `json:"uploads"`
+type UploaderCollection struct {
+	Uploaders []*Uploader `json:"uploaders"`
 }
 
-type Upload struct {
-	UploadDescription UploadDescription `json:"uploadDescription"`
-	UploadSessions    []UploadSession   `json:"uploadSessions,omitempty"`
+type Uploader struct {
+	UploaderDescription *UploaderDescription `json:"uploaderDescription"`
+	UploadSessions      []UploadSession      `json:"uploadSessions,omitempty"`
 }
 
-type UploadDescription struct {
-	UploadableProperties graphapi.MicrosoftGraphDriveItemUploadableProperties `json:"uploadableProperties"`
+type UploaderDescription struct {
+	UploaderReference    *UploaderReference                                    `json:"uploaderReference"`
+	UploadableProperties *graphapi.MicrosoftGraphDriveItemUploadableProperties `json:"uploadableProperties"`
+}
+
+type UploaderReference struct {
+	DriveType string  `json:"driveType"` // personal, business, documentLibrary
+	Name      string  `json:"name,omitempty"`
+	Size      int64   `json:"size"`
+	Path      string  `json:"path"`
+	UploadURL *string `json:"uploadUrl"`
 }
 
 type UploadSession struct {
-	UploadSessionDescription UploadSessionDescription             `json:"uploadSessionDescription"`
-	UploadSessionReference   graphapi.MicrosoftGraphUploadSession `json:"uploadSessionReference"`
+	UploadSessionDescription *UploadSessionDescription             `json:"uploadSessionDescription"`
+	UploadSessionReference   *graphapi.MicrosoftGraphUploadSession `json:"uploadSessionReference"`
 }
 
 // ContentLength: 26

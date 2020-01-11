@@ -113,9 +113,9 @@ type MicrosoftGraphDriveItem struct {
 	WebURL               string                       `json:"webUrl"`
 
 	/* instance annotations */
-	AtMicrosoftGraphConflictBehavior string `json:"@microsoft.graph.conflictBehavior"`
-	AtMicrosoftGraphDownloadURL      string `json:"@microsoft.graph.downloadUrl"`
-	AtMicrosoftGraphSourceURL        string `json:"@microsoft.graph.sourceUrl"`
+	AtMicrosoftGraphConflictBehavior *string `json:"@microsoft.graph.conflictBehavior,omitempty"`
+	AtMicrosoftGraphDownloadURL      *string `json:"@microsoft.graph.downloadUrl,omitempty"`
+	AtMicrosoftGraphSourceURL        *string `json:"@microsoft.graph.sourceUrl,omitempty"`
 	/* NOTE AtMicrosoftGraphConflictBehavior
 	 * The parameter @microsoft.graph.conflictBehavior should be included in the URL
 	 * instead of the body of the request.
@@ -128,6 +128,13 @@ type MicrosoftGraphDriveItem struct {
 	 *
 	 * https://docs.microsoft.com/en-us/graph/api/resources/driveitem?view=graph-rest-1.0#instance-attributes
 	 */
+
+	/* more */
+	AtOdataContext       *string `json:"@odata.context,omitempty"`
+	AtOdataType          *string `json:"@odata.type,omitempty"`
+	AtOdataID            *string `json:"@odata.id,omitempty"`
+	AtOdataEditLink      *string `json:"@odata.editLink,omitempty"`
+	AtContentDownloadURL *string `json:"@content.downloadUrl,omitempty"`
 }
 
 // MicrosoftGraphDriveItemCollection "@odata.type": "microsoft.graph.driveItemCollection"
@@ -185,6 +192,7 @@ type MicrosoftGraphDeleted struct {
 type MicrosoftGraphFile struct {
 	Hashes             *MicrosoftGraphHashes `json:"hashes,omitempty"`
 	MimeType           string                `json:"mimeType"`
+	IRMEnabled         *bool                 `json:"irmEnabled,omitempty"`
 	ProcessingMetadata *bool                 `json:"processingMetadata,omitempty"`
 }
 
@@ -603,7 +611,7 @@ type MicrosoftGraphSystemFacet struct {
 type MicrosoftGraphUploadSession struct {
 	ExpirationDateTime time.Time `json:"expirationDateTime"`
 	NextExpectedRanges []string  `json:"nextExpectedRanges"`
-	UploadURL          string    `json:"uploadUrl"`
+	UploadURL          *string   `json:"uploadUrl"`
 }
 
 // MicrosoftGraphDriveItemUploadableProperties  "@odata.type": "microsoft.graph.driveItemUploadableProperties"

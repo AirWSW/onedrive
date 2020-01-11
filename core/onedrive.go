@@ -28,9 +28,9 @@ func (od *OneDrive) Start(odc oneDriveCollection) error { // import cycle
 	if err := od.DriveCacheCollection.Save(od.OneDriveDescription.DriveDescription); err != nil {
 		return err
 	}
-	if err := od.UploaderCollection.Init(&od.MicrosoftGraphAPI); err != nil {
-		return err
-	}
+	// if err := od.UploaderCollection.Init(&od.MicrosoftGraphAPI); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 

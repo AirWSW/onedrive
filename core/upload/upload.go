@@ -93,17 +93,19 @@ func (u *Uploader) Start(api MicrosoftGraphAPI) {
 		log.Println(err)
 	}
 	for {
-		uploadSessions, err := NewUploadSessionsFromRange(size, microsoftGraphUploadSession)
-		if err != nil {
-			log.Println(err)
-		}
-		for _, innerUploadSession := range uploadSessions {
-			payload = strings.NewReader(randSeq(innerUploadSession.UploadSessionDescription.GetContentChunkSizeInt64()))
-			microsoftGraphUploadSession, err = innerUploadSession.Put(*uploadURL, payload)
+		func() {
+			uploadSessions, err := NewUploadSessionsFromRange(size, microsoftGraphUploadSession)
 			if err != nil {
 				log.Println(err)
 			}
-		}
+			for _, innerUploadSession := range uploadSessions {
+				payload = strings.NewReader(randSeq(innerUploadSession.UploadSessionDescription.GetContentChunkSizeInt64()))
+				microsoftGraphUploadSession, err = innerUploadSession.Put(*uploadURL, payload)
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}()
 	}
 	log.Println("v")
 

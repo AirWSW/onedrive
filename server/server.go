@@ -89,7 +89,7 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 			return
 		}
 	}
-	microsoftGraphDriveItemCache, err := ODCollection.UseOneDriveByOneDriveName(drive).GetMicrosoftGraphAPIMeDriveContentURL(path)
+	microsoftGraphDriveItemCache, err := od.GetMicrosoftGraphAPIMeDriveContentURL(path)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusNotFound)

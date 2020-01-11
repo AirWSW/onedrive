@@ -26,7 +26,7 @@ type MicrosoftGraphAPI interface {
 }
 
 func (uc *UploaderCollection) Init(api MicrosoftGraphAPI) error {
-	filename := "05"
+	filename := "06"
 	uploaderReference := &UploaderReference{
 		DriveType: "business",
 		Size:      629145600,
@@ -213,8 +213,8 @@ func (usd *UploadSessionDescription) SetContentRangTo() int64 {
 	if cr.To < 0 {
 		cr.To = usd.ContentLength - 1
 	}
-	if cr.To-cr.From > 4194304 {
-		cr.To = cr.From + 4194304 - 1
+	if cr.To-cr.From > 20971520 {
+		cr.To = cr.From + 20971520 - 1
 	}
 	if cr.To >= usd.ContentLength {
 		cr.To = usd.ContentLength - 1

@@ -205,11 +205,14 @@ func (api *MicrosoftGraphAPI) RefreshMicrosoftGraphAPIToken() error {
 
 func (api *MicrosoftGraphAPI) newMicrosoftGraphAPIRequest(method, reqURL string, payload io.Reader) (*http.Request, error) {
 	// New request
-	req, err := http.NewRequest(method, reqURL, nil)
+	req, err := http.NewRequest(method, reqURL, payload)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Add("Authorization", api.MicrosoftGraphAPIToken.GetAuthorizationString())
+	if method == "POST" {
+		req.Header.Add("Content-Type", "application/json")
+	}
 	return req, nil
 }
 

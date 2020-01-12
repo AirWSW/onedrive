@@ -60,16 +60,17 @@ func handlePostMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
+		log.Println(string(data))
 		postBody = bytes.NewReader(data)
 	}
-	bytes, err := od.MicrosoftGraphAPI.PostMicrosoftGraphAPIMeDriveRaw(path, postBody)
+	body, err := od.MicrosoftGraphAPI.PostMicrosoftGraphAPIMeDriveRaw(path, postBody)
 	if err != nil {
 		log.Println(err)
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 	AddDebugHeaders(c)
-	c.String(http.StatusOK, "%s", bytes)
+	c.String(http.StatusOK, "%s", body)
 }
 
 func handlePutMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {

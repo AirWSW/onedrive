@@ -154,6 +154,7 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 }
 
 func handlePostMicrosoftGraphNotification(c *gin.Context) {
+	validationToken := c.Query("validationToken")
 	if c.Request.ContentLength > 0 {
 		data, err := ioutil.ReadAll(c.Request.Body)
 		if err != nil {
@@ -161,8 +162,8 @@ func handlePostMicrosoftGraphNotification(c *gin.Context) {
 		}
 		log.Println(string(data))
 	}
-	AddDebugHeaders(c)
-	c.String(http.StatusOK, "ok!")
+	c.Header("Content-Type", "text/plain")
+	c.String(http.StatusOK, "%s", validationToken)
 }
 
 func main() {

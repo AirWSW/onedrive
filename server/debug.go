@@ -16,7 +16,7 @@ func AddDebugHeaders(c *gin.Context) {
 	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
 	c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
 	c.Header("Cache-Control", "private")
-	c.Header("Content-Type", "application/json")
+	c.Header("Content-Type", "application/json;charset=utf-8")
 }
 
 func handleGetMicrosoftGraphAPIMeDriveRaw(c *gin.Context) {

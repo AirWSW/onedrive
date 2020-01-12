@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
+	"runtime"
 
+	"github.com/DeanThompson/ginpprof"
 	"github.com/gin-gonic/gin"
 
 	"github.com/AirWSW/onedrive/core/collection"
@@ -150,18 +153,24 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 }
 
 func main() {
+	if ODCollection.IsDebugMode != nil && *ODCollection.IsDebugMode {
+		runtime.GOMAXPROCS(1)
+		runtime.SetMutexProfileFraction(1)
+		runtime.SetBlockProfileRate(1)
+	}
 	if err := collection.InitOneDriveCollectionFromConfigFile(); err != nil {
 		log.Panicln(err)
 	}
 	if err := ODCollection.StartAll(); err != nil {
 		log.Panicln(err)
 	}
+	router := gin.Default()
 	if ODCollection.IsDebugMode != nil && *ODCollection.IsDebugMode {
 		gin.SetMode(gin.DebugMode)
+		ginpprof.Wrap(router)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	router := gin.Default()
 	if ODCollection.IsDebugMode != nil && *ODCollection.IsDebugMode {
 		router.GET("/onedrive/raw", handleGetMicrosoftGraphAPIMeDriveRaw)
 		router.POST("/onedrive/raw", handlePostMicrosoftGraphAPIMeDriveRaw)

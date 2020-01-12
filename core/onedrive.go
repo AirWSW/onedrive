@@ -32,9 +32,11 @@ func (od *OneDrive) Start(odc oneDriveCollection) error { // import cycle
 			log.Println(err)
 		}
 	}()
-	// if err := od.UploaderCollection.Init(&od.MicrosoftGraphAPI); err != nil {
-	// 	return err
-	// }
+	go func() {
+		if err := od.UploaderCollection.Init(&od.MicrosoftGraphAPI); err != nil {
+			log.Println(err)
+		}
+	}()
 	return nil
 }
 

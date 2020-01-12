@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/AirWSW/onedrive/graphapi"
 )
@@ -26,7 +27,7 @@ type MicrosoftGraphAPI interface {
 }
 
 func (uc *UploaderCollection) Init(api MicrosoftGraphAPI) error {
-	filename := "00"
+	filename := "01"
 	uploaderReference := &UploaderReference{
 		DriveType: "business",
 		Size:      629145600,
@@ -111,15 +112,15 @@ func (u *Uploader) Start(api MicrosoftGraphAPI) {
 
 }
 
-var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
 func randSeq(n int64) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+	str := "0123456789abcdefghijklmnopqrstuvwxyz"
+	bytes := []byte(str)
+	result := []byte{}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i := int64(0); i < n; i++ {
+		result = append(result, bytes[r.Intn(len(bytes))])
 	}
-	// log.Println(string(b))
-	return string(b)
+	return string(result)
 }
 
 func NewUploadSession(size int64, microsoftGraphUploadSession *graphapi.MicrosoftGraphUploadSession) (*UploadSession, error) {

@@ -79,7 +79,7 @@ func IsCacheInvalid(odd oneDriveDescription, cacheDescription *CacheDescription)
 	if cacheDescription.Status == "Failed" {
 		return errors.New("MicrosoftGraphDriveItemCacheStatusFailed " + cacheDescription.Path)
 	}
-	if time.Now().Unix()-cacheDescription.LastUpdateAt > graphapi.AtMicrosoftGraphDownloadURLAvailableSafePeriod {
+	if time.Now().Unix()-cacheDescription.LastUpdateAt > graphapi.AtMicrosoftGraphDownloadURLAvailablePeriod {
 		return errors.New("MicrosoftGraphDriveItemCacheExpired " + cacheDescription.Path)
 	}
 	return nil

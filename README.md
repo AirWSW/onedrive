@@ -7,12 +7,13 @@ OneDrive API client using Microsoft Graph API
 1. OneDrive API client wrapper as OneIndex, PyIndex etc.
 2. Cache while first request income and auto refreshing.
 3. In memory cache with permanent local cache file (Experiment).
-4. Multi OneDrives within one endpoint, specify one drive by using query (Experiment).
+4. Multi OneDrives within one endpoint, specify one drive by using query.
 5. Run without other requirements, just configure once and run it.
 
 #### Danger testing
 
 1. Volume mounts and mount type setting.
+2. Using delta API or subscription/notification to update folder cache.
 
 #### Known BUGs
 

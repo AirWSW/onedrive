@@ -34,7 +34,9 @@ func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayl
 	if err != nil {
 		go func() {
 			if err := od.CronCacheMicrosoftGraphDrive(); err != nil {
-				log.Println(err)
+				log.Println("od.GetMicrosoftGraphDriveItem ", err)
+			} else {
+				od.DriveCacheCollection.Save(od.OneDriveDescription.DriveDescription)
 			}
 		}()
 		if microsoftGraphDriveItemCache == nil {

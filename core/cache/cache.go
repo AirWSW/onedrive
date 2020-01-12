@@ -70,6 +70,7 @@ func DriveItemToCache(microsoftGraphDriveItem *graphapi.MicrosoftGraphDriveItem)
 }
 
 func IsCacheInvalid(odd oneDriveDescription, cacheDescription *CacheDescription) error {
+	log.Println("IsCacheInvalid " + cacheDescription.Status + " " + cacheDescription.Path + " will expired at " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
 	if cacheDescription.Status == "Wait" {
 		return errors.New("MicrosoftGraphDriveItemCacheStatusWait " + cacheDescription.Path)
 	}
@@ -80,12 +81,13 @@ func IsCacheInvalid(odd oneDriveDescription, cacheDescription *CacheDescription)
 		return errors.New("MicrosoftGraphDriveItemCacheStatusFailed " + cacheDescription.Path)
 	}
 	if time.Now().Unix()-cacheDescription.LastUpdateAt > graphapi.AtMicrosoftGraphDownloadURLAvailablePeriod {
-		return errors.New("MicrosoftGraphDriveItemCacheExpired " + cacheDescription.Path)
+		return errors.New("MicrosoftGraphDriveItemCacheExpired " + cacheDescription.Path + " " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
 	}
 	return nil
 }
 
 func IsCacheNeedUpdate(odd oneDriveDescription, cacheDescription *CacheDescription) error {
+	log.Println("IsCacheNeedUpdate " + cacheDescription.Status + " " + cacheDescription.Path + " will expired at " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
 	if cacheDescription.Status == "Wait" {
 		return errors.New("MicrosoftGraphDriveItemCacheStatusWait " + cacheDescription.Path)
 	}
@@ -96,7 +98,7 @@ func IsCacheNeedUpdate(odd oneDriveDescription, cacheDescription *CacheDescripti
 		return nil
 	}
 	if time.Now().Unix()-cacheDescription.LastUpdateAt > graphapi.AtMicrosoftGraphDownloadURLAvailableSafePeriod-odd.GetRefreshInterval() {
-		return errors.New("MicrosoftGraphDriveItemCacheNeedUpdate " + cacheDescription.Path)
+		return errors.New("MicrosoftGraphDriveItemCacheNeedUpdate " + cacheDescription.Path + " " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
 	}
 	return nil
 }

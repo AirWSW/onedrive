@@ -139,8 +139,9 @@ type MicrosoftGraphDriveItem struct {
 
 // MicrosoftGraphDriveItemCollection "@odata.type": "microsoft.graph.driveItemCollection"
 type MicrosoftGraphDriveItemCollection struct {
-	Value           []MicrosoftGraphDriveItem `json:"value"`
-	AtODataNextLink *string                   `json:"@odata.nextLink,omitempty"`
+	Value            []MicrosoftGraphDriveItem `json:"value"`
+	AtODataDeltaLink *string                   `json:"@odata.deltaLink,omitempty"`
+	AtODataNextLink  *string                   `json:"@odata.nextLink,omitempty"`
 }
 
 // MicrosoftGraphAudio "@odata.type": "microsoft.graph.audio"

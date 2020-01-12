@@ -17,14 +17,15 @@ func (odc *OneDriveCollection) CronStartAll() error {
 		}
 		odc.SaveConfigFile()
 	})
-	for _, oneDrive := range odc.OneDrives {
+	for i := range odc.OneDrives {
+		oneDrive := odc.OneDrives[i]
 		refreshInterval := oneDrive.OneDriveDescription.GetRefreshInterval()
 		log.Printf("@every %ds od.CronCacheMicrosoftGraphDrive\n", refreshInterval)
 		c.AddFunc(fmt.Sprintf("@every %ds", refreshInterval), func() {
 			// log.Printf("start @every %ds od.CronCacheMicrosoftGraphDrive\n", refreshInterval)
 			// defer log.Printf("end @every %ds od.CronCacheMicrosoftGraphDrive\n", refreshInterval)
 			if err := oneDrive.CronCacheMicrosoftGraphDrive(); err != nil {
-				// log.Printf("@every %ds od.CronCacheMicrosoftGraphDrive %v\n", refreshInterval, err)
+				log.Printf("@every %ds od.CronCacheMicrosoftGraphDrive %v\n", refreshInterval, err)
 			} else {
 				// oneDrive.DriveCacheCollection.Save(oneDrive.OneDriveDescription.DriveDescription)
 			}

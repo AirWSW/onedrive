@@ -28,7 +28,7 @@ func (od *OneDrive) CronCacheMicrosoftGraphDrive() error {
 			}
 		}
 	}
-	if ok {
+	if !ok {
 		return errors.New("od.CronCacheMicrosoftGraphDrive NothingNeedToCache")
 	}
 	return nil

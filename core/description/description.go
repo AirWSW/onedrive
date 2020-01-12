@@ -106,11 +106,11 @@ func (odd *OneDriveDescription) UseMicrosoftGraphAPIMeDriveContentPath(str strin
 }
 
 func (odd *OneDriveDescription) GetRefreshInterval() int64 {
-	refreshInterval := int64(3000)
-	if odd.RefreshInterval < 60 {
-		refreshInterval = int64(60)
-	} else if odd.RefreshInterval < 3000 {
-		refreshInterval = odd.RefreshInterval
-	}
+	refreshInterval := int64(2)
+	// if odd.RefreshInterval < 60 {
+	// 	refreshInterval = int64(60)
+	// } else if odd.RefreshInterval < 3000 {
+	// 	refreshInterval = odd.RefreshInterval
+	// }
 	return refreshInterval
 }

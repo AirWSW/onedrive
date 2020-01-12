@@ -164,14 +164,14 @@ func main() {
 	if err := ODCollection.StartAll(); err != nil {
 		log.Panicln(err)
 	}
-	router := gin.Default()
 	if ODCollection.IsDebugMode != nil && *ODCollection.IsDebugMode {
 		gin.SetMode(gin.DebugMode)
-		ginpprof.Wrap(router)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
+	router := gin.Default()
 	if ODCollection.IsDebugMode != nil && *ODCollection.IsDebugMode {
+		ginpprof.Wrap(router)
 		router.GET("/onedrive/raw", handleGetMicrosoftGraphAPIMeDriveRaw)
 		router.POST("/onedrive/raw", handlePostMicrosoftGraphAPIMeDriveRaw)
 		router.PUT("/onedrive/raw", handlePutMicrosoftGraphAPIMeDriveRaw)

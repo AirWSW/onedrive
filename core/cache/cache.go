@@ -70,7 +70,7 @@ func DriveItemToCache(microsoftGraphDriveItem *graphapi.MicrosoftGraphDriveItem)
 }
 
 func IsCacheInvalid(odd oneDriveDescription, cacheDescription *CacheDescription) error {
-	log.Println("IsCacheInvalid " + cacheDescription.Status + " " + cacheDescription.Path + " will expired at " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
+	// log.Println("IsCacheInvalid " + cacheDescription.Status + " " + cacheDescription.Path + " will expired at " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
 	if cacheDescription.Status == "Wait" {
 		return errors.New("MicrosoftGraphDriveItemCacheStatusWait " + cacheDescription.Path)
 	}
@@ -87,7 +87,7 @@ func IsCacheInvalid(odd oneDriveDescription, cacheDescription *CacheDescription)
 }
 
 func IsCacheNeedUpdate(odd oneDriveDescription, cacheDescription *CacheDescription) error {
-	log.Println("IsCacheNeedUpdate " + cacheDescription.Status + " " + cacheDescription.Path + " will expired at " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
+	// log.Println("IsCacheNeedUpdate " + cacheDescription.Status + " " + cacheDescription.Path + " will expired at " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
 	if cacheDescription.Status == "Wait" {
 		return errors.New("MicrosoftGraphDriveItemCacheStatusWait " + cacheDescription.Path)
 	}

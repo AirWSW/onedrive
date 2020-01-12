@@ -8,6 +8,7 @@ import (
 )
 
 func (od *OneDrive) CronCacheMicrosoftGraphDrive() error {
+	ok := false
 	for i, microsoftGraphDriveItemCache := range od.DriveCacheCollection.MicrosoftGraphDriveItemCache {
 		cacheDescription := microsoftGraphDriveItemCache.CacheDescription
 		if err := cache.IsCacheNeedUpdate(&od.OneDriveDescription, cacheDescription); err != nil {
@@ -23,9 +24,12 @@ func (od *OneDrive) CronCacheMicrosoftGraphDrive() error {
 				newMicrosoftGraphDriveItemCache.CacheDescription.Status = "Cached"
 				od.DriveCacheCollection.MicrosoftGraphDriveItemCache[i] = *newMicrosoftGraphDriveItemCache
 				od.DriveCacheCollection.Save(od.OneDriveDescription.DriveDescription)
-				return nil
+				ok = true
 			}
 		}
 	}
-	return errors.New("od.CronCacheMicrosoftGraphDrive NothingNeedToCache")
+	if ok {
+		return errors.New("od.CronCacheMicrosoftGraphDrive NothingNeedToCache")
+	}
+	return nil
 }

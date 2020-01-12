@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -152,6 +153,18 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 	c.AbortWithStatus(http.StatusNotFound)
 }
 
+func handlePostMicrosoftGraphNotification(c *gin.Context) {
+	if c.Request.ContentLength > 0 {
+		data, err := ioutil.ReadAll(c.Request.Body)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(string(data))
+	}
+	AddDebugHeaders(c)
+	c.String(http.StatusOK, "ok!")
+}
+
 func main() {
 	if ODCollection.IsDebugMode != nil && *ODCollection.IsDebugMode {
 		runtime.GOMAXPROCS(1)
@@ -181,6 +194,7 @@ func main() {
 	router.GET("/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)
 	router.GET("/onedrive/search", handleGetMicrosoftGraphDriveItemSearch)
 	router.GET("/onedrive/status", handleGetOneDriveStatus)
+	router.POST("/onedrive/notification", handlePostMicrosoftGraphNotification)
 	router.GET("/api/onedrive/auth", handleGetAzureADAuth)
 	router.GET("/api/onedrive/content", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/api/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)

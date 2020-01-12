@@ -37,7 +37,9 @@ func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayl
 				log.Println(err)
 			}
 		}()
-		return nil, err
+		if microsoftGraphDriveItemCache == nil {
+			return nil, err
+		}
 	}
 	driveItemCachePayload, err := od.DriveItemCacheToPayLoad(microsoftGraphDriveItemCache)
 	if err != nil {

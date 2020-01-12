@@ -25,7 +25,7 @@ func (odc *OneDriveCollection) CronStartAll() error {
 			// log.Printf("start @every %ds od.CronCacheMicrosoftGraphDrive\n", refreshInterval)
 			// defer log.Printf("end @every %ds od.CronCacheMicrosoftGraphDrive\n", refreshInterval)
 			if err := oneDrive.CronCacheMicrosoftGraphDrive(); err != nil {
-				log.Printf("@every %ds od.CronCacheMicrosoftGraphDrive %v\n", refreshInterval, err)
+				// log.Printf("@every %ds od.CronCacheMicrosoftGraphDrive %v\n", refreshInterval, err)
 			} else {
 				// oneDrive.DriveCacheCollection.Save(oneDrive.OneDriveDescription.DriveDescription)
 			}

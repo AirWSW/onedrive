@@ -177,6 +177,7 @@ func (dcc *DriveCacheCollection) GetMicrosoftGraphDriveFromCache(odd oneDriveDes
 				return nil, err
 			}
 			if filename == "" {
+				log.Println("Cache hitted for", cacheDescription.RequestURL, time.Unix(cacheDescription.LastUpdateAt, 0).UTC())
 				return &microsoftGraphDriveItemCache, nil
 			} else {
 				return dcc.GetMicrosoftGraphDriveFromCacheStep2(odd, microsoftGraphDriveItemCache, filename, path, isContentURL)
@@ -219,14 +220,16 @@ func (dcc *DriveCacheCollection) GetMicrosoftGraphDriveFromCacheStep3(odd oneDri
 			log.Println("Cache hitted for", cacheDescription.RequestURL, time.Unix(cacheDescription.LastUpdateAt, 0).UTC())
 			return &children, nil
 		} else {
+			var err error = nil
 			for _, innerMicrosoftGraphDriveItemCache := range dcc.MicrosoftGraphDriveItemCache {
 				innerCacheDescription := innerMicrosoftGraphDriveItemCache.CacheDescription
 				if innerCacheDescription.Path == path {
-					if err := IsCacheInvalid(odd, innerCacheDescription); err != nil {
-						return nil, err
+					if err = IsCacheInvalid(odd, innerCacheDescription); err != nil {
+						// return &this, err
+					} else {
+						log.Println("Cache hitted for", innerCacheDescription.RequestURL, time.Unix(innerCacheDescription.LastUpdateAt, 0).UTC())
+						return &innerMicrosoftGraphDriveItemCache, nil
 					}
-					log.Println("Cache hitted for", innerCacheDescription.RequestURL, time.Unix(innerCacheDescription.LastUpdateAt, 0).UTC())
-					return &innerMicrosoftGraphDriveItemCache, nil
 				}
 			}
 			log.Println("Cache missed for", path)
@@ -244,8 +247,10 @@ func (dcc *DriveCacheCollection) GetMicrosoftGraphDriveFromCacheStep3(odd oneDri
 				LastUpdateAt: 0,
 				Status:       "Wait",
 			}
-			dcc.MicrosoftGraphDriveItemCache = append(dcc.MicrosoftGraphDriveItemCache, newChildren)
-			return &newChildren, nil
+			if err == nil {
+				dcc.MicrosoftGraphDriveItemCache = append(dcc.MicrosoftGraphDriveItemCache, newChildren)
+			}
+			return &newChildren, err
 		}
 	}
 	return nil, errors.New("NoMicrosoftGraphDriveItemCacheRecord " + path)

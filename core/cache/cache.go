@@ -18,6 +18,9 @@ var mutex sync.Mutex
 func DriveItemToCache(microsoftGraphDriveItem *graphapi.MicrosoftGraphDriveItem) (*MicrosoftGraphDriveItemCache, error) {
 	parentReference := microsoftGraphDriveItem.ParentReference
 	path := parentReference.Path + "/" + microsoftGraphDriveItem.Name
+	if parentReference.Path == "" {
+		path = "/drive/root:"
+	}
 	cacheDescription := &CacheDescription{
 		RequestURL:   path,
 		Path:         path,
@@ -160,6 +163,9 @@ func (dcc *DriveCacheCollection) GetMicrosoftGraphDriveFromCache(odd oneDriveDes
 	subPath, filename := utils.RegularPathToPathFilename(path)
 	path = odd.RelativePathToDriveRootPath(path)
 	subPath = odd.RelativePathToDriveRootPath(subPath)
+	if path == "/drive/root:" {
+		subPath, filename = "/drive/root:", ""
+	}
 	log.Println("Hitting cache for", subPath)
 	for _, microsoftGraphDriveItemCache := range dcc.MicrosoftGraphDriveItemCache {
 		cacheDescription := microsoftGraphDriveItemCache.CacheDescription

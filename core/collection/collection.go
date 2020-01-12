@@ -43,10 +43,8 @@ func (odc *OneDriveCollection) UseOneDriveByOneDriveName(str string) *core.OneDr
 
 func (odc *OneDriveCollection) UseOneDriveByStateID(str string) *core.OneDrive {
 	for _, oneDrive := range odc.OneDrives {
-		if oneDrive.AzureADAuthFlowContext.StateID != nil {
-			if *oneDrive.AzureADAuthFlowContext.StateID == str {
-				return oneDrive
-			}
+		if oneDrive.AzureADAuthFlowContext.StateID != nil && *oneDrive.AzureADAuthFlowContext.StateID == str {
+			return oneDrive
 		}
 	}
 	return nil

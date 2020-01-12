@@ -26,12 +26,12 @@ type MicrosoftGraphAPI interface {
 }
 
 func (uc *UploaderCollection) Init(api MicrosoftGraphAPI) error {
-	filename := "06"
+	filename := "00"
 	uploaderReference := &UploaderReference{
 		DriveType: "business",
 		Size:      629145600,
 		Name:      filename,
-		Path:      "/drive/root:/cdn/post/uploder/test/" + filename,
+		Path:      "/drive/root:/cdn/post/uploader/test/" + filename,
 	}
 	atMicrosoftGraphConflictBehavior := "replace"
 	uploadableProperties := &graphapi.MicrosoftGraphDriveItemUploadableProperties{

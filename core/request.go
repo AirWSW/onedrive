@@ -15,6 +15,10 @@ func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayl
 	newPath := utils.RegularPath(path)
 	newPathLength := len(newPath)
 	parentPath, filename := utils.RegularPathToPathFilename(path)
+	if newPath == "/drive/root:" {
+		newPath = "/drive/root"
+		parentPath, filename = "/drive/root", ""
+	}
 	driveVolumeMountRule := &description.DriveVolumeMount{}
 	for _, driveVolumeMount := range od.OneDriveDescription.DriveVolumeMounts {
 		target := utils.RegularPath(*driveVolumeMount.Target)

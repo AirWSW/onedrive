@@ -87,6 +87,9 @@ func (odd *OneDriveDescription) UseMicrosoftGraphAPIMeDriveItem(str string) stri
 }
 
 func (odd *OneDriveDescription) UseMicrosoftGraphAPIMeDriveChildren(str string) string {
+	if str == "/drive/root:" {
+		return "/me/drive/root/children"
+	}
 	return "/me" + str + ":/children"
 }
 

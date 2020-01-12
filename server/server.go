@@ -20,6 +20,23 @@ func AddDefalutHeaders(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 }
 
+func handleGetOneDriveStatus(c *gin.Context) {
+	drive := c.Query("drive")
+	od := ODCollection.UseDefaultOneDrive()
+	if len(drive) > 0 {
+		od = ODCollection.UseOneDriveByOneDriveName(drive)
+		if od == nil {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		AddDefalutHeaders(c)
+		c.String(http.StatusOK, "%s", []byte(`{"status":"ok","drive":"`+drive+`"}`))
+		return
+	}
+	AddDefalutHeaders(c)
+	c.String(http.StatusOK, "%s", []byte(`{"status":"ok"}`))
+}
+
 func handleGetAuth(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
@@ -121,11 +138,13 @@ func main() {
 		router.PUT("/onedrive/raw", handlePutMicrosoftGraphAPIMeDriveRaw)
 	}
 	router.GET("/onedrive/auth", handleGetAuth)
-	router.GET("/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)
 	router.GET("/onedrive/content", handleGetMicrosoftGraphDriveItemContentURL)
+	router.GET("/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)
+	router.GET("/onedrive/status", handleGetOneDriveStatus)
 	router.GET("/api/onedrive/auth", handleGetAuth)
-	router.GET("/api/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)
 	router.GET("/api/onedrive/content", handleGetMicrosoftGraphDriveItemContentURL)
+	router.GET("/api/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)
+	router.GET("/api/onedrive/status", handleGetOneDriveStatus)
 	router.GET("/onedrive/drive", handleGetMicrosoftGraphDriveItem)
 	router.GET("/onedrive/file", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/onedrive/stream/*path", handleGetMicrosoftGraphDriveItemContentURL)

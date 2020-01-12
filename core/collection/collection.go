@@ -25,7 +25,7 @@ func (odc *OneDriveCollection) UseDefaultOneDrive() *core.OneDrive {
 
 func (odc *OneDriveCollection) UseOneDriveByID(str string) *core.OneDrive {
 	for _, oneDrive := range odc.OneDrives {
-		if oneDrive.OneDriveDescription.DriveDescription.ID == str {
+		if oneDrive.OneDriveDescription.DriveDescription != nil && oneDrive.OneDriveDescription.DriveDescription.ID == str {
 			return oneDrive
 		}
 	}
@@ -34,7 +34,7 @@ func (odc *OneDriveCollection) UseOneDriveByID(str string) *core.OneDrive {
 
 func (odc *OneDriveCollection) UseOneDriveByOneDriveName(str string) *core.OneDrive {
 	for _, oneDrive := range odc.OneDrives {
-		if oneDrive.OneDriveDescription.OneDriveName == str {
+		if oneDrive.OneDriveDescription.OneDriveName != nil && *oneDrive.OneDriveDescription.OneDriveName == str {
 			return oneDrive
 		}
 	}

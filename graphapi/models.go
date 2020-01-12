@@ -179,7 +179,7 @@ type MicrosoftGraphIdentitySet struct {
 // MicrosoftGraphIdentity "@odata.type": "microsoft.graph.identity"
 type MicrosoftGraphIdentity struct {
 	DisplayName string                      `json:"displayName"`
-	ID          string                      `json:"id"`
+	ID          string                      `json:"id,omitempty"`
 	Thumbnails  *MicrosoftGraphThumbnailSet `json:"thumbnails,omitempty"`
 }
 

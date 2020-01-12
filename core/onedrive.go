@@ -1,6 +1,8 @@
 package core
 
 import (
+	"log"
+
 	"github.com/AirWSW/onedrive/core/api"
 	"github.com/AirWSW/onedrive/graphapi"
 )
@@ -25,9 +27,11 @@ func (od *OneDrive) Start(odc oneDriveCollection) error { // import cycle
 	if err := od.DriveCacheCollection.Load(od.OneDriveDescription.DriveDescription); err != nil {
 		return err
 	}
-	if err := od.DriveCacheCollection.Save(od.OneDriveDescription.DriveDescription); err != nil {
-		return err
-	}
+	go func() {
+		if err := od.CronCacheMicrosoftGraphDrive(); err != nil {
+			log.Println(err)
+		}
+	}()
 	// if err := od.UploaderCollection.Init(&od.MicrosoftGraphAPI); err != nil {
 	// 	return err
 	// }

@@ -4,7 +4,7 @@ import "github.com/AirWSW/onedrive/graphapi"
 
 // OneDriveDescription describes the OneDrive local client
 type OneDriveDescription struct {
-	OneDriveName      string                        `json:"oneDriveName"`
+	OneDriveName      *string                       `json:"oneDriveName"`
 	RootPath          string                        `json:"rootPath"`
 	RefreshInterval   int64                         `json:"refreshInterval"`
 	DriveVolumeMounts []DriveVolumeMount            `json:"driveVolumeMounts,omitempty"`

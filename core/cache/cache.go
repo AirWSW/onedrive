@@ -161,11 +161,11 @@ func (dcc *DriveCacheCollection) GetMicrosoftGraphDriveFromCache(odd oneDriveDes
 	path = odd.RelativePathToDriveRootPath(path)
 	subPath = odd.RelativePathToDriveRootPath(subPath)
 	log.Println("Hitting cache for", subPath)
-	for i, microsoftGraphDriveItemCache := range dcc.MicrosoftGraphDriveItemCache {
+	for _, microsoftGraphDriveItemCache := range dcc.MicrosoftGraphDriveItemCache {
 		cacheDescription := microsoftGraphDriveItemCache.CacheDescription
 		if cacheDescription.Path == subPath {
 			if err := IsCacheInvalid(odd, cacheDescription); err != nil {
-				dcc.MicrosoftGraphDriveItemCache[i].CacheDescription.Status = "Faild"
+				// dcc.MicrosoftGraphDriveItemCache[i].CacheDescription.Status = "Failed"
 				return nil, err
 			}
 			if filename == "" {

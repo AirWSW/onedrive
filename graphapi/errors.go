@@ -10,6 +10,6 @@ type ODataError struct {
 	MicrosoftGraphInnerError *ODataError `json:"innerError,omitempty"`
 }
 
-func (e *ODataError) OnError() {
+func (e *ODataError) On() {
 
 }

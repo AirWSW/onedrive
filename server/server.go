@@ -13,11 +13,11 @@ import (
 var ODCollection *collection.OneDriveCollection = &collection.ODCollection
 
 func AddDefalutHeaders(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", "*")
-	c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-	c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
-	c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
-	c.Next()
+	// c.Header("Access-Control-Allow-Origin", "*")
+	// c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+	// c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
+	// c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
+	c.Header("Content-Type", "application/json")
 }
 
 func handleGetAuth(c *gin.Context) {
@@ -29,7 +29,7 @@ func handleGetAuth(c *gin.Context) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
-		if len(code) > 0 {
+		if len(code) > 0 && od.AzureADAuthFlowContext.RefreshToken == nil {
 			od.AzureADAuthFlowContext.Code = &code
 			if err := od.ReStart(ODCollection); err != nil {
 				log.Println(err)
@@ -65,10 +65,7 @@ func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
-		c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
+		AddDefalutHeaders(c)
 		c.String(http.StatusOK, "%s", bytes)
 		return
 	}
@@ -97,10 +94,7 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 	}
 	if microsoftGraphDriveItemCache != nil {
 		if microsoftGraphDriveItemCache.DownloadURL != nil {
-			c.Header("Access-Control-Allow-Origin", "*")
-			c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-			c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
-			c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
+			AddDefalutHeaders(c)
 			c.Redirect(http.StatusFound, *microsoftGraphDriveItemCache.DownloadURL)
 			return
 		}
@@ -127,10 +121,14 @@ func main() {
 		router.PUT("/onedrive/raw", handlePutMicrosoftGraphAPIMeDriveRaw)
 	}
 	router.GET("/onedrive/auth", handleGetAuth)
+	router.GET("/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)
+	router.GET("/onedrive/content", handleGetMicrosoftGraphDriveItemContentURL)
+	router.GET("/api/onedrive/auth", handleGetAuth)
+	router.GET("/api/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)
+	router.GET("/api/onedrive/content", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/onedrive/drive", handleGetMicrosoftGraphDriveItem)
 	router.GET("/onedrive/file", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/onedrive/stream/*path", handleGetMicrosoftGraphDriveItemContentURL)
-	router.GET("/api/onedrive/auth", handleGetAuth)
 	router.GET("/api/onedrive/drive", handleGetMicrosoftGraphDriveItem)
 	router.GET("/api/onedrive/file", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/api/onedrive/stream/*path", handleGetMicrosoftGraphDriveItemContentURL)

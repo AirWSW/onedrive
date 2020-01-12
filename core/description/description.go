@@ -2,6 +2,7 @@ package description
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/url"
 	"strings"
@@ -19,12 +20,14 @@ func (odd *OneDriveDescription) Init(api MicrosoftGraphAPI) error {
 	if err != nil {
 		log.Println(err)
 	}
-	microsoftGraphDrive := graphapi.MicrosoftGraphDrive{}
-	if err := json.Unmarshal(bytes, &microsoftGraphDrive); err != nil {
+	newMicrosoftGraphDrive := graphapi.MicrosoftGraphDrive{}
+	if err := json.Unmarshal(bytes, &newMicrosoftGraphDrive); err != nil {
 		log.Println(err)
 	}
-	odd.SetDriveDescription(&microsoftGraphDrive)
-	return nil
+	if odd.DriveDescription != nil && odd.DriveDescription.ID != newMicrosoftGraphDrive.ID {
+		return errors.New("odd.Init DriveDescriptionIDDoesNOTMatchRecord")
+	}
+	return odd.SetDriveDescription(&newMicrosoftGraphDrive)
 }
 
 func (odd *OneDriveDescription) SetDriveDescription(input *graphapi.MicrosoftGraphDrive) error {

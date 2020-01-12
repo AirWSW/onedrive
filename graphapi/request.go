@@ -104,7 +104,7 @@ func NewMicrosoftGraphAPI(input *NewMicrosoftGraphAPIInput) (*MicrosoftGraphAPI,
 	return api, nil
 }
 
-func (api *MicrosoftGraphAPI) getMicrosoftGraphAPITokenRequestPostForm() (io.Reader, error) {
+func (api *MicrosoftGraphAPI) getMicrosoftGraphAPITokenRequestPostForm(str string) (io.Reader, error) {
 	data := url.Values{}
 	azureADAuthFlowContext := api.AzureADAuthFlowContext
 	azureADAppRegistration := api.AzureADAppRegistration
@@ -116,33 +116,21 @@ func (api *MicrosoftGraphAPI) getMicrosoftGraphAPITokenRequestPostForm() (io.Rea
 	} else if azureADAuthFlowContext.Code != nil {
 		data.Set("grant_type", "authorization_code")
 		data.Set("code", *azureADAuthFlowContext.Code)
-	} else {
-		// If both RefreshToken and Code are invalid, log error and return authorize urls
-		log.Println("Invalid Microsoft Graph API Token Grant Type, use the following URLs to GET code")
-		clientID := azureADAppRegistration.ClientID
-		grantScope := url.QueryEscape(azureADAuthFlowContext.GrantScope)
-		state := *azureADAuthFlowContext.StateID
-		getAzureADAuthorizeEndPointURL := api.MicrosoftEndPoints.GetAzureADAuthorizeEndPointURL()
-		for _, redirectURI := range azureADAppRegistration.RedirectURIs {
-			log.Println(getAzureADAuthorizeEndPointURL + "?client_id=" + clientID + "&response_type=code" + "&redirect_uri=" + redirectURI + "&response_mode=query" + "&scope=" + grantScope + "&state=" + state)
-		}
-		return nil, errors.New("Invalid Microsoft Graph API Token Grant Type")
 	}
 
 	// Setting other post form data
 	data.Set("client_id", azureADAppRegistration.ClientID)
 	data.Set("client_secret", azureADAppRegistration.ClientSecret)
-	redirectURIs := azureADAppRegistration.RedirectURIs
-	data.Set("redirect_uri", redirectURIs[0])
+	data.Set("redirect_uri", str)
 
 	// return io.Reader
 	return strings.NewReader(data.Encode()), nil
 }
 
-func (api *MicrosoftGraphAPI) getMicrosoftGraphAPITokenRequest() error {
+func (api *MicrosoftGraphAPI) getMicrosoftGraphAPITokenRequest(str string) error {
 	// New post request
 	postAzureADTokenEndPointURL := api.MicrosoftEndPoints.PostAzureADTokenEndPointURL()
-	postForm, err := api.getMicrosoftGraphAPITokenRequestPostForm()
+	postForm, err := api.getMicrosoftGraphAPITokenRequestPostForm(str)
 	if err != nil {
 		return err
 	}
@@ -160,36 +148,55 @@ func (api *MicrosoftGraphAPI) getMicrosoftGraphAPITokenRequest() error {
 	}
 
 	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 	if resp.StatusCode < http.StatusBadRequest {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
 		// json.Unmarshal the post response
 		newMicrosoftGraphAPIToken := &MicrosoftGraphAPIToken{}
 		if err = json.Unmarshal(body, newMicrosoftGraphAPIToken); err != nil {
 			return err
 		}
-		if newMicrosoftGraphAPIToken == nil {
-			return errors.New("api.getMicrosoftGraphAPITokenRequest GET " + postAzureADTokenEndPointURL)
+		if newMicrosoftGraphAPIToken != nil {
+			if err := api.MicrosoftGraphAPIToken.Set(newMicrosoftGraphAPIToken); err != nil {
+				return err
+			}
+			log.Println("api.getMicrosoftGraphAPITokenRequest GET " + postAzureADTokenEndPointURL)
+			// Bind api.MicrosoftGraphAPIToken.RefreshToken to api.AzureADAuthFlowContext.RefreshToken
+			return api.AzureADAuthFlowContext.SetRefreshToken(api.MicrosoftGraphAPIToken.RefreshToken)
 		}
-		if err := api.MicrosoftGraphAPIToken.Set(newMicrosoftGraphAPIToken); err != nil {
-			return err
-		}
-		log.Println("api.getMicrosoftGraphAPITokenRequest GET " + postAzureADTokenEndPointURL)
-		// Bind api.MicrosoftGraphAPIToken.RefreshToken to api.AzureADAuthFlowContext.RefreshToken
-		return api.AzureADAuthFlowContext.SetRefreshToken(api.MicrosoftGraphAPIToken.RefreshToken)
+		return errors.New("api.getMicrosoftGraphAPITokenRequest GET NothingFrom " + postAzureADTokenEndPointURL)
 	}
+	bodyStr := string(body)
 	if resp.StatusCode < http.StatusInternalServerError {
-		log.Println("api.getMicrosoftGraphAPITokenRequest GET BadRequest " + postAzureADTokenEndPointURL)
+		log.Println("api.getMicrosoftGraphAPITokenRequest GET BadRequest " + postAzureADTokenEndPointURL + ", error payload: " + bodyStr)
 		return errors.New(http.StatusText(resp.StatusCode))
 	}
-	log.Println("api.getMicrosoftGraphAPITokenRequest GET InternalServerError " + postAzureADTokenEndPointURL)
+	log.Println("api.getMicrosoftGraphAPITokenRequest GET InternalServerError " + postAzureADTokenEndPointURL + ", error payload: " + bodyStr)
 	return errors.New(http.StatusText(resp.StatusCode))
 }
 
 func (api *MicrosoftGraphAPI) GetMicrosoftGraphAPIToken() error {
-	return api.getMicrosoftGraphAPITokenRequest()
+	azureADAuthFlowContext := api.AzureADAuthFlowContext
+	azureADAppRegistration := api.AzureADAppRegistration
+	if azureADAuthFlowContext.RefreshToken != nil || azureADAuthFlowContext.Code != nil {
+		for _, redirectURI := range azureADAppRegistration.RedirectURIs {
+			if err := api.getMicrosoftGraphAPITokenRequest(redirectURI); err == nil {
+				return nil
+			}
+		}
+	}
+	// If both RefreshToken and Code are invalid, log error and return authorize urls
+	log.Println("Invalid Microsoft Graph API Token Grant Type, use the following URLs to GET code")
+	clientID := azureADAppRegistration.ClientID
+	grantScope := url.QueryEscape(azureADAuthFlowContext.GrantScope)
+	state := *azureADAuthFlowContext.StateID
+	getAzureADAuthorizeEndPointURL := api.MicrosoftEndPoints.GetAzureADAuthorizeEndPointURL()
+	for _, redirectURI := range azureADAppRegistration.RedirectURIs {
+		log.Println(getAzureADAuthorizeEndPointURL + "?client_id=" + clientID + "&response_type=code" + "&redirect_uri=" + redirectURI + "&response_mode=query" + "&scope=" + grantScope + "&state=" + state)
+	}
+	return errors.New("Invalid Microsoft Graph API Token Grant Type")
 }
 
 func (api *MicrosoftGraphAPI) RefreshMicrosoftGraphAPIToken() error {
@@ -222,23 +229,24 @@ func (api *MicrosoftGraphAPI) useMicrosoftGraphAPIRequest(method, reqURL string,
 	}
 
 	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	if resp.StatusCode < http.StatusBadRequest {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
 		log.Println("api.useMicrosoftGraphAPIRequest " + method + " " + reqURL)
 		return []byte(body), nil
 	}
+	bodyStr := string(body)
 	if resp.StatusCode < http.StatusInternalServerError {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
-		log.Println("api.useMicrosoftGraphAPIRequest " + method + " BadRequest " + reqURL)
+		log.Println("api.useMicrosoftGraphAPIRequest " + method + " BadRequest " + reqURL + ", error payload: " + bodyStr)
 		return []byte(body), errors.New(http.StatusText(resp.StatusCode))
 	}
-	log.Println("api.useMicrosoftGraphAPIRequest " + method + " InternalServerError " + reqURL)
+	log.Println("api.useMicrosoftGraphAPIRequest " + method + " InternalServerError " + reqURL + ", error payload: " + bodyStr)
 	return nil, errors.New(http.StatusText(resp.StatusCode))
 }
 

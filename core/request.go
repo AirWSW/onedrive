@@ -91,10 +91,14 @@ func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *cache.
 		// Folder item which has children items
 		parentReference = microsoftGraphDriveItemCache.Children[0].ParentReference
 		relativePath = oneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
-	} else {
+	} else if microsoftGraphDriveItemCache.Folder != nil {
 		// Folder item which does NOT sync children items yet or does NOT have children
 		parentReference = microsoftGraphDriveItemCache.ParentReference
 		relativePath = oneDriveDescription.DriveRootPathToRelativePath(parentReference.Path + "/" + microsoftGraphDriveItemCache.Name)
+	} else if microsoftGraphDriveItemCache.File != nil {
+		// File item
+		parentReference = microsoftGraphDriveItemCache.ParentReference
+		relativePath = oneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
 	}
 	driveItemCachePayloadReference = &DriveItemCachePayloadReference{
 		LastUpdateAt: time.Unix(microsoftGraphDriveItemCache.CacheDescription.LastUpdateAt, 0).UTC(),

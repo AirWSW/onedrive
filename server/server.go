@@ -17,10 +17,12 @@ import (
 var ODCollection *collection.OneDriveCollection = &collection.ODCollection
 
 func AddDefalutHeaders(c *gin.Context) {
-	// c.Header("Access-Control-Allow-Origin", "*")
-	// c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-	// c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
-	// c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
+	if ODCollection.IsDebugMode != nil && *ODCollection.IsDebugMode {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range")
+		c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
+	}
 	c.Header("Cache-Control", "private")
 	c.Header("Content-Type", "application/json;charset=utf-8")
 }
@@ -81,6 +83,11 @@ func handleGetMicrosoftGraphDriveItem(c *gin.Context) {
 		log.Println(err)
 	}
 	if microsoftGraphDriveItemCache != nil {
+		if force := c.Query("force"); force != "" {
+			if err := od.ForceGetMicrosoftGraphDriveItem(path, force); err != nil {
+				log.Println(err)
+			}
+		}
 		bytes, err := json.Marshal(microsoftGraphDriveItemCache)
 		if err != nil {
 			log.Println(err)

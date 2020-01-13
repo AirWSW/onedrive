@@ -14,7 +14,7 @@ import (
 func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayload, error) {
 	newPath := utils.RegularPath(path)
 	newPathLength := len(newPath)
-	parentPath, filename := utils.RegularPathToPathFilename(path)
+	parentPath, filename := utils.RegularPathToPathFilename(newPath)
 	if newPath == "/drive/root:" {
 		newPath = "/drive/root"
 		parentPath, filename = "/drive/root", ""
@@ -78,8 +78,30 @@ func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayl
 			innerDriveItemCachePayload = append(innerDriveItemCachePayload, newDriveItemCachePayload)
 		}
 	}
-
 	return driveItemCachePayload, nil
+}
+
+func (od *OneDrive) ForceGetMicrosoftGraphDriveItem(path, force string) error {
+	odd := od.OneDriveDescription
+	newPath := utils.RegularPath(path)
+	parentPath, _ := utils.RegularPathToPathFilename(newPath)
+	newPath = odd.RelativePathToDriveRootPath(newPath)
+	parentPath = odd.RelativePathToDriveRootPath(parentPath)
+	for i, microsoftGraphDriveItemCache := range od.DriveCacheCollection.MicrosoftGraphDriveItemCache {
+		if microsoftGraphDriveItemCache.CacheDescription.Path == newPath {
+			od.DriveCacheCollection.MicrosoftGraphDriveItemCache[i].CacheDescription.Status = "Force"
+		} else if microsoftGraphDriveItemCache.CacheDescription.Path == parentPath {
+			od.DriveCacheCollection.MicrosoftGraphDriveItemCache[i].CacheDescription.Status = "Force"
+		}
+	}
+	// go func() {
+	// 	if err := od.CronCacheMicrosoftGraphDrive(); err != nil {
+	// 		log.Println("od.ForceGetMicrosoftGraphDriveItem", err)
+	// 	} else {
+	// 		od.DriveCacheCollection.Save(od.OneDriveDescription.DriveDescription)
+	// 	}
+	// }()
+	return nil
 }
 
 func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *cache.MicrosoftGraphDriveItemCache) (*DriveItemCachePayload, error) {

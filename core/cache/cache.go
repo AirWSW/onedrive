@@ -80,6 +80,9 @@ func IsCacheInvalid(odd oneDriveDescription, cacheDescription *CacheDescription)
 	if cacheDescription.Status == "Failed" {
 		return errors.New("MicrosoftGraphDriveItemCacheStatusFailed " + cacheDescription.Path)
 	}
+	if cacheDescription.Status == "Force" {
+		return nil
+	}
 	if time.Now().Unix()-cacheDescription.LastUpdateAt > graphapi.AtMicrosoftGraphDownloadURLAvailablePeriod {
 		return errors.New("MicrosoftGraphDriveItemCacheExpired " + cacheDescription.Path + " " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
 	}
@@ -96,6 +99,9 @@ func IsCacheNeedUpdate(odd oneDriveDescription, cacheDescription *CacheDescripti
 	}
 	if cacheDescription.Status == "Failed" {
 		return nil
+	}
+	if cacheDescription.Status == "Force" {
+		return errors.New("MicrosoftGraphDriveItemCacheStatusForce " + cacheDescription.Path)
 	}
 	if time.Now().Unix()-cacheDescription.LastUpdateAt > graphapi.AtMicrosoftGraphDownloadURLAvailableSafePeriod-odd.GetRefreshInterval() {
 		return errors.New("MicrosoftGraphDriveItemCacheNeedUpdate " + cacheDescription.Path + " " + time.Unix(cacheDescription.LastUpdateAt, 0).UTC().String())
@@ -242,8 +248,10 @@ func (dcc *DriveCacheCollection) GetMicrosoftGraphDriveFromCacheStep3(odd oneDri
 			}
 			if err == nil {
 				dcc.MicrosoftGraphDriveItemCache = append(dcc.MicrosoftGraphDriveItemCache, newChildren)
+				return &newChildren, errors.New("NoMicrosoftGraphDriveItemCacheRecord " + path)
+			} else {
+				return &newChildren, err
 			}
-			return &newChildren, err
 		}
 	}
 	return nil, errors.New("NoMicrosoftGraphDriveItemCacheRecord " + path)

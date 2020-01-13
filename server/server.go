@@ -145,7 +145,7 @@ func handleGetMicrosoftGraphDriveItemContentURL(c *gin.Context) {
 	}
 	if microsoftGraphDriveItemCache != nil {
 		if microsoftGraphDriveItemCache.DownloadURL != nil {
-			AddDefalutHeaders(c)
+			c.Header("Cache-Control", "private")
 			c.Redirect(http.StatusFound, *microsoftGraphDriveItemCache.DownloadURL)
 			return
 		}

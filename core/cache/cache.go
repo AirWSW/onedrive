@@ -233,14 +233,7 @@ func (dcc *DriveCacheCollection) GetMicrosoftGraphDriveFromCacheStep3(odd oneDri
 				}
 			}
 			log.Println("Cache missed for", path)
-			parentReference := this.ParentReference
 			newChildren := children
-			newChildren.ParentReference = &graphapi.MicrosoftGraphItemReference{
-				DriveID:   parentReference.DriveID,
-				DriveType: parentReference.DriveType,
-				ID:        this.ID,
-				Path:      path,
-			}
 			newChildren.CacheDescription = &CacheDescription{
 				RequestURL:   path,
 				Path:         path,

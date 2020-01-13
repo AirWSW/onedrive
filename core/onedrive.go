@@ -29,7 +29,7 @@ func (od *OneDrive) Start(odc oneDriveCollection) error { // import cycle
 	}
 	go func() {
 		if err := od.CronCacheMicrosoftGraphDrive(); err != nil {
-			log.Println("od.Start ", err)
+			log.Println("od.Start", err)
 		} else {
 			od.DriveCacheCollection.Save(od.OneDriveDescription.DriveDescription)
 		}

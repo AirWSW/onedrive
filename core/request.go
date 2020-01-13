@@ -34,7 +34,7 @@ func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayl
 	if err != nil {
 		go func() {
 			if err := od.CronCacheMicrosoftGraphDrive(); err != nil {
-				log.Println("od.GetMicrosoftGraphDriveItem ", err)
+				log.Println("od.GetMicrosoftGraphDriveItem", err)
 			} else {
 				od.DriveCacheCollection.Save(od.OneDriveDescription.DriveDescription)
 			}
@@ -91,16 +91,8 @@ func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *cache.
 		// Folder item which has children items
 		parentReference = microsoftGraphDriveItemCache.Children[0].ParentReference
 		relativePath = oneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
-	} else if microsoftGraphDriveItemCache.Folder != nil && microsoftGraphDriveItemCache.Children == nil {
-		// Folder item which does NOT have children items
-		parentReference = microsoftGraphDriveItemCache.ParentReference
-		relativePath = oneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
-	} else if microsoftGraphDriveItemCache.File != nil {
-		// File item
-		parentReference = microsoftGraphDriveItemCache.ParentReference
-		relativePath = oneDriveDescription.DriveRootPathToRelativePath(parentReference.Path)
 	} else {
-		// Folder item which does NOT sync children items yet
+		// Folder item which does NOT sync children items yet or does NOT have children
 		parentReference = microsoftGraphDriveItemCache.ParentReference
 		relativePath = oneDriveDescription.DriveRootPathToRelativePath(parentReference.Path + "/" + microsoftGraphDriveItemCache.Name)
 	}

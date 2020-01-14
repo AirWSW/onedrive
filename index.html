@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>OneDrive Web Client</title>
     <style>
       *,
       :after,
@@ -15,21 +15,81 @@
         margin: 0;
         padding: 0;
         border: 0;
+        min-width: 320px;
         font-size: 14px;
         font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
           Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
           Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
       }
+      a {
+        color: #007bff;
+        text-decoration: none;
+      }
       .drive-container {
-        padding: 0 20px;
-        @media (min-width: 520px) {
+        margin: 20px auto;
+        padding: 0 18px;
+      }
+      .select-drive {
+        margin: 0 0 10px;
+        font-size: 16px;
+        text-align: center;
+      }
+      .date,
+      .type {
+        display: none;
+      }
+      @media (min-width: 375px) {
+        .date {
+          display: table-cell;
+        }
+      }
+      @media (min-width: 425px) {
+        .type {
+          display: table-cell;
+        }
+      }
+      @media (min-width: 576px) {
+        .drive-container {
+          padding: 0;
+          max-width: 540px;
+        }
+      }
+      @media (min-width: 768px) {
+        .drive-container {
+          max-width: 720px;
+        }
+      }
+      @media (min-width: 992px) {
+        .drive-container {
+          max-width: 960px;
         }
       }
       .drive-container > h1 {
-        margin: 0;
+        margin: 0 0 10px;
         padding: 0;
         font-size: 30px;
         font-weight: 400;
+        text-align: center;
+      }
+      .navigation {
+        margin: 0 0 10px;
+        font-size: 16px;
+        line-height: 26px;
+        color: #586069;
+        float: right;
+      }
+      .breadcrumb {
+        margin: 0 0 10px;
+        font-size: 16px;
+        line-height: 26px;
+        color: #586069;
+      }
+      .breadcrumb > .separator:after,
+      .breadcrumb > .separator:before {
+        content: " ";
+      }
+      .breadcrumb > span {
+        word-wrap: break-word;
       }
       .drive-table-wrap {
         margin-bottom: 10px;
@@ -38,6 +98,32 @@
         border-bottom-right-radius: 3px;
         border-bottom-left-radius: 3px;
         font-size: 14px;
+      }
+
+      .drive-details {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        position: relative;
+        padding: 10px;
+        margin-bottom: -1px;
+        font-size: 13px;
+        line-height: 20px;
+        color: #586069;
+        background-color: #f1f8ff;
+        border: 1px solid #c8e1ff;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+      }
+      .drive-details > div {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        word-wrap: break-word;
+        overflow: hidden;
+        max-width: 300px;
+      }
+      .drive-details > .drive {
+        margin-right: 20px;
       }
       span > strong,
       table > thead > tr > th {
@@ -50,6 +136,18 @@
         border-collapse: collapse;
         border-color: grey;
         border-radius: 2px;
+      }
+      table > thead > tr > th {
+        padding: 6px 3px;
+        line-height: 20px;
+        border-top: 1px solid #eaecef;
+        white-space: nowrap;
+        word-wrap: break-word;
+        text-overflow: ellipsis;
+        text-align: left;
+        word-break: keep-all;
+        overflow: hidden;
+        background-color: #f8f8f8;
       }
       table > tbody > tr {
         transition: background-color 0.5s;
@@ -77,13 +175,6 @@
         word-break: keep-all;
         overflow: hidden;
       }
-      table > tbody > tr > td > a {
-        color: #0366d6;
-        text-decoration: none;
-      }
-      table > tbody > tr > td > a.link-gray {
-        color: #586069 !important;
-      }
       img,
       svg {
         vertical-align: middle;
@@ -96,11 +187,48 @@
         padding-left: 10px;
         fill: rgba(3, 47, 98, 0.55);
       }
-      table > tbody > tr > td.size {
+      table > tbody > tr > td > a {
+        color: #0366d6;
+        text-decoration: none;
+      }
+      table > tbody > tr > td > a.link-gray {
+        color: #586069 !important;
+      }
+      table > thead > tr > th.name,
+      table > tbody > tr > td.name {
         max-width: 120px;
-        padding-right: 10px;
+        text-align: left;
+      }
+      table > tbody > tr > td.name {
         color: #6a737d;
+        white-space: nowrap;
+      }
+      table > thead > tr > th.date,
+      table > tbody > tr > td.date {
+        max-width: 80px;
+        text-align: left;
+      }
+      table > tbody > tr > td.date {
+        color: #6a737d;
+        white-space: nowrap;
+      }
+      table > thead > tr > th.type,
+      table > tbody > tr > td.type {
+        max-width: 60px;
+        text-align: left;
+      }
+      table > tbody > tr > td.type {
+        color: #6a737d;
+        white-space: nowrap;
+      }
+      table > thead > tr > th.size,
+      table > tbody > tr > td.size {
+        max-width: 80px;
         text-align: right;
+        padding-right: 10px;
+      }
+      table > tbody > tr > td.size {
+        color: #6a737d;
         white-space: nowrap;
       }
     </style>
@@ -108,12 +236,17 @@
   <body>
     <div class="drive-container">
       <h1>{{ .title }}</h1>
-      <div class="breadcrumb"></div>
+      <div class="select-drive"></div>
+      <div class="drive-navigation">
+        <div class="navigation"></div>
+        <div class="breadcrumb"></div>
+      </div>
+      <div class="drive-details"></div>
       <div class="drive-table-wrap">
         <table class="drive-table">
           <thead>
             <tr class="drive-title">
-              <th class="icon">Icon</th>
+              <th class="icon"></th>
               <th class="name">Name</th>
               <th class="date">Date modified</th>
               <th class="type">Type</th>
@@ -125,13 +258,37 @@
     </div>
 
     <script>
-      console.log(window.location);
+      var refresh = "{{.refresh}}";
       var drive = "{{.drive}}";
       var rawData = "{{.rawData}}";
+      var description = "{{.description}}";
       var driveItem = JSON.parse(window.atob(rawData));
+      var driveDescription = JSON.parse(window.atob(description));
+      console.log(window.location);
+      console.log(refresh);
+      console.log(drive);
       console.log(driveItem);
+      console.log(driveDescription);
+      function OneDriveNameToQueryURL(name) {
+        return (
+          "//" +
+          window.location.host +
+          window.location.pathname +
+          "?" +
+          (name ? "drive=" + name : "")
+        );
+      }
+      function ForceRefreshURL(force) {
+        console.log(window.location.search.lastIndexOf("force="));
+        return (
+          "//" +
+          window.location.host +
+          window.location.pathname +
+          window.location.search +
+          (force ? "&force=" + force : "")
+        );
+      }
       function PathToParentQueryURL(path) {
-        console.log(path);
         return (
           "//" +
           window.location.host +
@@ -146,7 +303,6 @@
         );
       }
       function BreadcrumbPathToQueryURL(path, name) {
-        console.log(path);
         return (
           "//" +
           window.location.host +
@@ -187,35 +343,60 @@
       function SizeToString(size) {
         size = size / 1024;
         if (size < 1024) {
-          return size.toFixed(3) + " KB";
+          return size.toFixed(3) + " KiB";
         }
         size = size / 1024;
         if (size < 1024) {
-          return size.toFixed(3) + " MB";
+          return size.toFixed(3) + " MiB";
         }
         size = size / 1024;
         if (size < 1024) {
-          return size.toFixed(3) + " GB";
+          return size.toFixed(3) + " GiB";
         }
         size = size / 1024;
         if (size < 1024) {
-          return size.toFixed(3) + " TB";
+          return size.toFixed(3) + " TiB";
         }
         size = size / 1024;
-        return size.toFixed(3) + " PB";
+        return size.toFixed(3) + " PiB";
       }
       function View(Property) {
+        let selectDrive = document.getElementsByClassName("select-drive")[0];
+        selectDriveFragment = document.createDocumentFragment();
+        driveDescription.map(item => {
+          let selectDriveDiv = document.createElement("div");
+          selectDriveDiv.innerHTML = `<a href="${OneDriveNameToQueryURL(
+            item.oneDriveName
+          )}">${item.oneDriveName}</a>`;
+          selectDriveFragment.appendChild(selectDriveDiv);
+        });
+        selectDrive.appendChild(selectDriveFragment);
+
+        if (refresh == "false") {
+          let navigation = document.getElementsByClassName("navigation")[0];
+          navigationFragment = document.createDocumentFragment();
+          let navigationDiv = document.createElement("div");
+          navigationDiv.innerHTML = `<a href="${ForceRefreshURL(
+            "force_refresh_token"
+          )}">Refresh</a>`;
+          navigationFragment.appendChild(navigationDiv);
+          navigation.appendChild(navigationFragment);
+        }
+
         let breadcrumb = document.getElementsByClassName("breadcrumb")[0];
         breadcrumbFragment = document.createDocumentFragment();
-        let breadcrumbSpan = document.createElement("span");
-        breadcrumbSpan.innerHTML = `<strong><a href="${PathToParentQueryURL(
-          "/"
-        )}">${drive}</a></strong>`;
-        breadcrumbFragment.append(breadcrumbSpan);
-        let breadcrumbSeparator = document.createElement("span");
-        breadcrumbSeparator.innerHTML = `/`;
-        breadcrumbFragment.append(breadcrumbSeparator);
-        breadcrumb.appendChild(breadcrumbFragment);
+        if (drive !== "") {
+          let breadcrumbSpan = document.createElement("span");
+          breadcrumbSpan.innerHTML = `<strong><a href="${PathToParentQueryURL(
+            "/"
+          )}">${drive}</a></strong>`;
+          breadcrumbFragment.append(breadcrumbSpan);
+          let breadcrumbSeparator = document.createElement("span");
+          breadcrumbSeparator.setAttribute("class", "separator");
+          breadcrumbSeparator.innerHTML = `/`;
+          breadcrumbFragment.append(breadcrumbSeparator);
+          breadcrumb.appendChild(breadcrumbFragment);
+        }
         if (driveItem.reference && driveItem.reference.path) {
           driveItem.reference.path.split("/").map(name => {
             if (name !== "") {
@@ -227,6 +408,7 @@
                 )}">${name}</a>`;
                 breadcrumbFragment.append(breadcrumbSpan);
                 let breadcrumbSeparator = document.createElement("span");
+                breadcrumbSeparator.setAttribute("class", "separator");
                 breadcrumbSeparator.innerHTML = `/`;
                 breadcrumbFragment.append(breadcrumbSeparator);
                 breadcrumb.appendChild(breadcrumbFragment);
@@ -235,6 +417,7 @@
                 breadcrumbSpan.innerHTML = `<strong>${name}</strong>`;
                 breadcrumbFragment.append(breadcrumbSpan);
                 let breadcrumbSeparator = document.createElement("span");
+                breadcrumbSeparator.setAttribute("class", "separator");
                 breadcrumbSeparator.innerHTML = `/`;
                 breadcrumbFragment.append(breadcrumbSeparator);
                 breadcrumb.appendChild(breadcrumbFragment);
@@ -242,23 +425,30 @@
             }
           });
         }
+
+        let driveDetails = document.getElementsByClassName("drive-details")[0];
+        driveDetailsFragment = document.createDocumentFragment();
+        let driveDetailsDivA = document.createElement("div");
+        driveDetailsDivA.setAttribute("class", "drive");
+        driveDetailsDivA.innerHTML = `<a><span>${driveItem.name} </span>Last modified at ${driveItem.lastModifiedAt}</a>`;
+        driveDetailsFragment.append(driveDetailsDivA);
+        let driveDetailsDivB = document.createElement("div");
+        driveDetailsDivB.setAttribute("class", "update");
+        driveDetailsDivB.innerHTML = `<span>Last update at ${driveItem.reference.lastUpdateAt}</span>`;
+        driveDetailsFragment.append(driveDetailsDivB);
+        driveDetails.appendChild(driveDetailsFragment);
+
         let driveTable = document.getElementsByClassName("drive-table")[0];
-        let driveTableBodyA = document.createElement("tbody");
-        driveTableBodyA.innerHTML = `<tr class="up-tree"><td class="icon"></td><td class="name">${
-          driveItem.reference.path === "/"
-            ? "<a>..</a>"
-            : `<a href=${PathToParentQueryURL(
-                driveItem.file
-                  ? driveItem.downloadUrl
-                  : driveItem.reference.path
-              )}>..</a>`
-        }</td><td class="date"></td><td class="type"></td><td class="size"></td></tr>`;
-        console.log(driveTableBodyA);
-        driveTable.appendChild(driveTableBodyA);
+        if (driveItem.reference.path !== "/") {
+          let driveTableBodyA = document.createElement("tbody");
+          driveTableBodyA.innerHTML = `<tr class="up-tree"><td class="icon"></td><td class="name"><a href=${PathToParentQueryURL(
+            driveItem.file ? driveItem.downloadUrl : driveItem.reference.path
+          )}>..</a></td><td class="date"></td><td class="type"></td><td class="size"></td></tr>`;
+          driveTable.appendChild(driveTableBodyA);
+        }
         let driveTableBodyB = document.createElement("tbody");
         if (driveItem.children) {
           driveItem.children.map(item => {
-            console.log(item);
             let driveTableBodyRow = document.createElement("tr");
             driveTableBodyRow.innerHTML = `<tr><td class="icon">
             ${

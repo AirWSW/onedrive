@@ -83,7 +83,9 @@ func handleGetOneDrive(c *gin.Context) {
 	if err != nil {
 		log.Println(err)
 	}
+	refresh := false
 	if force := c.Query("force"); force != "" {
+		refresh = true
 		if err := od.ForceGetMicrosoftGraphDriveItem(path, force); err != nil {
 			log.Println(err)
 		}
@@ -95,10 +97,16 @@ func handleGetOneDrive(c *gin.Context) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
+		description, err := ODCollection.GetDescription()
+		if err != nil {
+			log.Println(err)
+		}
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"title":   "OneDrive web client",
-			"drive":   drive,
-			"rawData": base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(data),
+			"title":       "OneDrive Web Client",
+			"refresh":     refresh,
+			"drive":       drive,
+			"rawData":     base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(data),
+			"description": base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(description),
 		})
 		return
 	}
@@ -235,8 +243,10 @@ func main() {
 		router.POST("/onedrive/raw", handlePostMicrosoftGraphAPIMeDriveRaw)
 		router.PUT("/onedrive/raw", handlePutMicrosoftGraphAPIMeDriveRaw)
 	}
-	router.LoadHTMLFiles("index.html")
-	router.GET("/onedrive", handleGetOneDrive)
+	if ODCollection.PageTemplate != nil {
+		router.LoadHTMLFiles(*ODCollection.PageTemplate)
+		router.GET("/onedrive", handleGetOneDrive)
+	}
 	router.GET("/onedrive/auth", handleGetAzureADAuth)
 	router.GET("/onedrive/content", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)

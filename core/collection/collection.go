@@ -1,6 +1,11 @@
 package collection
 
-import "github.com/AirWSW/onedrive/core"
+import (
+	"encoding/json"
+
+	"github.com/AirWSW/onedrive/core"
+	"github.com/AirWSW/onedrive/core/description"
+)
 
 var ODCollection OneDriveCollection
 
@@ -17,6 +22,18 @@ func (odc *OneDriveCollection) StartAll() error {
 		return err
 	}
 	return nil
+}
+
+func (odc *OneDriveCollection) GetDescription() ([]byte, error) {
+	var odcDescription []description.OneDriveDescription
+	for _, oneDrive := range odc.OneDrives {
+		oneDriveDescription := oneDrive.OneDriveDescription
+		newOneDriveDescription := description.OneDriveDescription{
+			OneDriveName: oneDriveDescription.OneDriveName,
+		}
+		odcDescription = append(odcDescription, newOneDriveDescription)
+	}
+	return json.Marshal(odcDescription)
 }
 
 func (odc *OneDriveCollection) UseDefaultOneDrive() *core.OneDrive {

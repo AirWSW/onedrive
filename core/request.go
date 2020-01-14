@@ -59,8 +59,7 @@ func (od *OneDrive) GetMicrosoftGraphDriveItem(path string) (*DriveItemCachePayl
 		innerDriveItemCachePayload := []DriveItemCachePayload{}
 		newDriveItemCachePayload := DriveItemCachePayload{}
 		for _, children := range driveItemCachePayload.Children {
-			innerDownloadURL := od.OneDriveDescription.DriveRootPathToRelativePath(microsoftGraphDriveItemCache.ParentReference.Path)
-			innerDownloadURL += "/" + children.Name
+			innerDownloadURL := utils.RegularPath(od.OneDriveDescription.DriveRootPathToRelativePath(microsoftGraphDriveItemCache.ParentReference.Path) + "/" + children.Name)
 			innerDownloadURLPointer := &innerDownloadURL
 			if children.Folder != nil {
 				innerDownloadURLPointer = nil
@@ -131,7 +130,7 @@ func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *cache.
 	innerDriveItemCachePayload := []DriveItemCachePayload{}
 	newDriveItemCachePayload := DriveItemCachePayload{}
 	for _, children := range microsoftGraphDriveItemCache.Children {
-		innerDownloadURL := relativePath + "/" + children.Name
+		innerDownloadURL := utils.RegularPath(relativePath + "/" + children.Name)
 		innerDownloadURLPointer := &innerDownloadURL
 		if children.Folder != nil {
 			innerDownloadURLPointer = nil
@@ -155,7 +154,7 @@ func (od *OneDrive) DriveItemCacheToPayLoad(microsoftGraphDriveItemCache *cache.
 	} else if oneDriveDescription.OneDriveName != nil {
 		name = *oneDriveDescription.OneDriveName
 	}
-	downloadURL := relativePath + "/" + microsoftGraphDriveItemCache.Name
+	downloadURL := utils.RegularPath(relativePath + "/" + microsoftGraphDriveItemCache.Name)
 	downloadURLPointer := &downloadURL
 	if microsoftGraphDriveItemCache.Folder != nil {
 		downloadURLPointer = nil

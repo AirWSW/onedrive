@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -63,6 +64,43 @@ func handleGetAzureADAuth(c *gin.Context) {
 			c.String(http.StatusOK, "code %s", code)
 			return
 		}
+	}
+	c.AbortWithStatus(http.StatusNotFound)
+}
+
+func handleGetOneDrive(c *gin.Context) {
+	drive := c.Query("drive")
+	od := ODCollection.UseDefaultOneDrive()
+	if len(drive) > 0 {
+		od = ODCollection.UseOneDriveByOneDriveName(drive)
+		if od == nil {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+	}
+	path := c.Query("path")
+	microsoftGraphDriveItemCache, err := od.GetMicrosoftGraphDriveItem(path)
+	if err != nil {
+		log.Println(err)
+	}
+	if force := c.Query("force"); force != "" {
+		if err := od.ForceGetMicrosoftGraphDriveItem(path, force); err != nil {
+			log.Println(err)
+		}
+	}
+	if microsoftGraphDriveItemCache != nil {
+		data, err := json.Marshal(microsoftGraphDriveItemCache)
+		if err != nil {
+			log.Println(err)
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"title":   "OneDrive web client",
+			"drive":   drive,
+			"rawData": base64.StdEncoding.WithPadding(base64.NoPadding).EncodeToString(data),
+		})
+		return
 	}
 	c.AbortWithStatus(http.StatusNotFound)
 }
@@ -197,6 +235,8 @@ func main() {
 		router.POST("/onedrive/raw", handlePostMicrosoftGraphAPIMeDriveRaw)
 		router.PUT("/onedrive/raw", handlePutMicrosoftGraphAPIMeDriveRaw)
 	}
+	router.LoadHTMLFiles("index.html")
+	router.GET("/onedrive", handleGetOneDrive)
 	router.GET("/onedrive/auth", handleGetAzureADAuth)
 	router.GET("/onedrive/content", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)
@@ -206,10 +246,8 @@ func main() {
 	router.GET("/api/onedrive/auth", handleGetAzureADAuth)
 	router.GET("/api/onedrive/content", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/api/onedrive/driveitem", handleGetMicrosoftGraphDriveItem)
-	router.GET("/onedrive/drive", handleGetMicrosoftGraphDriveItem)
 	router.GET("/onedrive/file", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/onedrive/stream/*path", handleGetMicrosoftGraphDriveItemContentURL)
-	router.GET("/api/onedrive/drive", handleGetMicrosoftGraphDriveItem)
 	router.GET("/api/onedrive/file", handleGetMicrosoftGraphDriveItemContentURL)
 	router.GET("/api/onedrive/stream/*path", handleGetMicrosoftGraphDriveItemContentURL)
 	if err := router.Run("localhost:8081"); err != nil {

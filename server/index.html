@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      *,
+      :after,
+      :before {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 14px;
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+          Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
+          Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+      }
+      .drive-container {
+        padding: 0 20px;
+        @media (min-width: 520px) {
+        }
+      }
+      .drive-container > h1 {
+        margin: 0;
+        padding: 0;
+        font-size: 30px;
+        font-weight: 400;
+      }
+      .drive-table-wrap {
+        margin-bottom: 10px;
+        border: 1px solid #dfe2e5;
+        border-top: 0;
+        border-bottom-right-radius: 3px;
+        border-bottom-left-radius: 3px;
+        font-size: 14px;
+      }
+      span > strong,
+      table > thead > tr > th {
+        font-weight: 600;
+      }
+      table {
+        display: table;
+        width: 100%;
+        border-spacing: 0;
+        border-collapse: collapse;
+        border-color: grey;
+        border-radius: 2px;
+      }
+      table > tbody > tr {
+        transition: background-color 0.5s;
+      }
+      table > tbody > tr:hover {
+        background-color: #f6f8fa;
+      }
+      table > tbody > tr.up-tree > td > a {
+        padding: 3px 6px;
+        margin-left: -3px;
+        font-weight: 600;
+        border-radius: 2px;
+        transition: background-color 0.5s;
+      }
+      table > tbody > tr.up-tree > td > a:hover {
+        background-color: #dfe2e5;
+      }
+      table > tbody > tr > td {
+        padding: 6px 3px;
+        line-height: 20px;
+        border-top: 1px solid #eaecef;
+        white-space: nowrap;
+        word-wrap: break-word;
+        text-overflow: ellipsis;
+        word-break: keep-all;
+        overflow: hidden;
+      }
+      table > tbody > tr > td > a {
+        color: #0366d6;
+        text-decoration: none;
+      }
+      table > tbody > tr > td > a.link-gray {
+        color: #586069 !important;
+      }
+      img,
+      svg {
+        vertical-align: middle;
+      }
+      table > tbody > tr > td.icon {
+        width: 17px;
+        min-width: 26px;
+        max-width: 26px;
+        padding-right: 2px;
+        padding-left: 10px;
+        fill: rgba(3, 47, 98, 0.55);
+      }
+      table > tbody > tr > td.size {
+        max-width: 120px;
+        padding-right: 10px;
+        color: #6a737d;
+        text-align: right;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="drive-container">
+      <h1>{{ .title }}</h1>
+      <div class="breadcrumb"></div>
+      <div class="drive-table-wrap">
+        <table class="drive-table">
+          <thead>
+            <tr class="drive-title">
+              <th class="icon">Icon</th>
+              <th class="name">Name</th>
+              <th class="date">Date modified</th>
+              <th class="type">Type</th>
+              <th class="size">Size</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      console.log(window.location);
+      var drive = "{{.drive}}";
+      var rawData = "{{.rawData}}";
+      var driveItem = JSON.parse(window.atob(rawData));
+      console.log(driveItem);
+      function PathToParentQueryURL(path) {
+        console.log(path);
+        return (
+          "//" +
+          window.location.host +
+          window.location.pathname +
+          "?" +
+          (drive ? "drive=" + drive : "") +
+          (path.lastIndexOf("/") === 0
+            ? ""
+            : (drive ? "&" : "") +
+              "path=" +
+              path.substring(1, path.lastIndexOf("/")))
+        );
+      }
+      function BreadcrumbPathToQueryURL(path, name) {
+        console.log(path);
+        return (
+          "//" +
+          window.location.host +
+          window.location.pathname +
+          "?" +
+          (drive ? "drive=" + drive : "") +
+          (path === "/"
+            ? ""
+            : "&path=" + path.substring(1, path.lastIndexOf(name)) + name)
+        );
+      }
+      function PathFilenameToQueryURL(path, filename) {
+        return (
+          "//" +
+          window.location.host +
+          window.location.pathname +
+          "?" +
+          (drive ? "drive=" + drive + "&" : "") +
+          "path=" +
+          (path === "/" ? "" : path.substring(1, path.length) + "/") +
+          (filename ? filename : "")
+        );
+      }
+      function DownloadURLToQueryDownloadURL(downloadUrl) {
+        return (
+          "//" +
+          window.location.host +
+          window.location.pathname +
+          "/content" +
+          "?" +
+          (drive ? "drive=" + drive + "&" : "") +
+          "path=" +
+          (downloadUrl === "/"
+            ? ""
+            : downloadUrl.substring(1, downloadUrl.length))
+        );
+      }
+      function SizeToString(size) {
+        size = size / 1024;
+        if (size < 1024) {
+          return size.toFixed(3) + " KB";
+        }
+        size = size / 1024;
+        if (size < 1024) {
+          return size.toFixed(3) + " MB";
+        }
+        size = size / 1024;
+        if (size < 1024) {
+          return size.toFixed(3) + " GB";
+        }
+        size = size / 1024;
+        if (size < 1024) {
+          return size.toFixed(3) + " TB";
+        }
+        size = size / 1024;
+        return size.toFixed(3) + " PB";
+      }
+      function View(Property) {
+        let breadcrumb = document.getElementsByClassName("breadcrumb")[0];
+        breadcrumbFragment = document.createDocumentFragment();
+        let breadcrumbSpan = document.createElement("span");
+        breadcrumbSpan.innerHTML = `<strong><a href="${PathToParentQueryURL(
+          "/"
+        )}">${drive}</a></strong>`;
+        breadcrumbFragment.append(breadcrumbSpan);
+        let breadcrumbSeparator = document.createElement("span");
+        breadcrumbSeparator.innerHTML = `/`;
+        breadcrumbFragment.append(breadcrumbSeparator);
+        breadcrumb.appendChild(breadcrumbFragment);
+        if (driveItem.reference && driveItem.reference.path) {
+          driveItem.reference.path.split("/").map(name => {
+            if (name !== "") {
+              if (name !== driveItem.name) {
+                let breadcrumbSpan = document.createElement("span");
+                breadcrumbSpan.innerHTML = `<a href="${BreadcrumbPathToQueryURL(
+                  driveItem.reference.path,
+                  name
+                )}">${name}</a>`;
+                breadcrumbFragment.append(breadcrumbSpan);
+                let breadcrumbSeparator = document.createElement("span");
+                breadcrumbSeparator.innerHTML = `/`;
+                breadcrumbFragment.append(breadcrumbSeparator);
+                breadcrumb.appendChild(breadcrumbFragment);
+              } else {
+                let breadcrumbSpan = document.createElement("span");
+                breadcrumbSpan.innerHTML = `<strong>${name}</strong>`;
+                breadcrumbFragment.append(breadcrumbSpan);
+                let breadcrumbSeparator = document.createElement("span");
+                breadcrumbSeparator.innerHTML = `/`;
+                breadcrumbFragment.append(breadcrumbSeparator);
+                breadcrumb.appendChild(breadcrumbFragment);
+              }
+            }
+          });
+        }
+        let driveTable = document.getElementsByClassName("drive-table")[0];
+        let driveTableBodyA = document.createElement("tbody");
+        driveTableBodyA.innerHTML = `<tr class="up-tree"><td class="icon"></td><td class="name">${
+          driveItem.reference.path === "/"
+            ? "<a>..</a>"
+            : `<a href=${PathToParentQueryURL(
+                driveItem.file
+                  ? driveItem.downloadUrl
+                  : driveItem.reference.path
+              )}>..</a>`
+        }</td><td class="date"></td><td class="type"></td><td class="size"></td></tr>`;
+        console.log(driveTableBodyA);
+        driveTable.appendChild(driveTableBodyA);
+        let driveTableBodyB = document.createElement("tbody");
+        if (driveItem.children) {
+          driveItem.children.map(item => {
+            console.log(item);
+            let driveTableBodyRow = document.createElement("tr");
+            driveTableBodyRow.innerHTML = `<tr><td class="icon">
+            ${
+              item.folder
+                ? `<svg viewBox="0 0 14 16" version="1.1" width="16" height="16"><path d="M13 4H7V3c0-.66-.31-1-1-1H1c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V5c0-.55-.45-1-1-1zM6 4H1V3h5v1z"></path></svg>`
+                : `<svg viewBox="0 0 12 16" version="1.1" width="16" height="16"><path d="M6 5H2V4h4v1zM2 8h7V7H2v1zm0 2h7V9H2v1zm0 2h7v-1H2v1zm10-7.5V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V2c0-.55.45-1 1-1h7.5L12 4.5zM11 5L8 2H1v12h10V5z"></path></svg>`
+            }
+            </td><td class="name"><a href="${
+              item.file
+                ? DownloadURLToQueryDownloadURL(item.downloadUrl)
+                : PathFilenameToQueryURL(driveItem.reference.path, item.name)
+            }">${item.name}</a></td><td class="date"><a class="link-gray">${
+              item.lastModifiedAt
+            }</a></td><td class="type"><span>${
+              item.file ? item.file.mimeType : ""
+            }</span></td><td class="size"><span>${SizeToString(
+              item.size
+            )}</span></td></tr>`;
+            driveTableBodyB.append(driveTableBodyRow);
+          });
+        }
+        driveTable.appendChild(driveTableBodyB);
+      }
+      window.onload = View("name");
+    </script>
+  </body>
+</html>
